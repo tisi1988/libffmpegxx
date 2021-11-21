@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# GitEye workspace
+/.project
+
+# build folder
+/build
+
+# QtCreator tmp files
+CMakeLists.txt.user

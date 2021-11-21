@@ -1,0 +1,5 @@
+// the configured options and settings for Tutorial
+#define libffmpegxx_VERSION_MAJOR @libffmpegxx_VERSION_MAJOR@
+#define libffmpegxx_VERSION_MINOR @libffmpegxx_VERSION_MINOR@
+#define libffmpegxx_VERSION_PATCH @libffmpegxx_VERSION_PATCH@
+
