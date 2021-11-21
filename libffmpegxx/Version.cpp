@@ -1,4 +1,4 @@
-#include "public/version.h"
+#include "public/Version.h"
 
 #include "ffmpegxx_config.h"
 
