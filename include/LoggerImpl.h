@@ -11,6 +11,8 @@ public:
   void setLogLevel(LogLevel const &level) override;
   void setOutputStream(std::ostream *os) override;
 
+  void logMessage(LogLevel const &level, std::string const &message);
+
   LogLevel getLogLevel() const;
   std::ostream *getOutputStream() const;
 

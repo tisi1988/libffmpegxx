@@ -33,6 +33,8 @@ public:
    * @brief Sets an output stream to print the log messages. By default,
    * the logger does not have any.
    * @param os The new output stream.
+   * @note Every time an output stream is set, the library notifies
+   * its version and the current log level.
    */
   virtual void setOutputStream(std::ostream *os) = 0;
 };

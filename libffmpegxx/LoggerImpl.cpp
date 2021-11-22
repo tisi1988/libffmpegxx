@@ -1,5 +1,7 @@
 #include "LoggerImpl.h"
 
+#include "public/Version.h"
+
 #include <string>
 
 namespace libffmpegxx {
@@ -52,7 +54,7 @@ void log_cb(void *, int level, const char *szFmt, va_list varg) {
   av_log_format_line(nullptr, level, szFmt, varg, buffer, sizeof(buffer),
                      &printPrefix);
 
-  *ostream << buffer;
+  g_logger.logMessage(mapped_log_level, buffer);
 }
 
 LoggerImpl::LoggerImpl() {
@@ -62,7 +64,46 @@ LoggerImpl::LoggerImpl() {
 
 void LoggerImpl::setLogLevel(LogLevel const &level) { m_log_level = level; }
 
-void LoggerImpl::setOutputStream(std::ostream *os) { m_output_stream = os; }
+std::string logLevelToString(LogLevel level) {
+  switch (level) {
+  case LogLevel::FATAL:
+    return "FATAL";
+  case LogLevel::ERROR:
+    return "ERROR";
+  case LogLevel::WARN:
+    return "WARN";
+  case LogLevel::INFO:
+    return "INFO";
+  case LogLevel::DEBUG:
+    return "DEBUG";
+  case LogLevel::VERBOSE:
+    return "VERBOSE";
+  case LogLevel::QUIET:
+  default:
+    return "";
+  }
+}
+
+void LoggerImpl::setOutputStream(std::ostream *os) {
+  m_output_stream = os;
+  if (m_output_stream) {
+    auto const salute = logLevelToString(LogLevel::INFO) + " libffmpegxx v" +
+                        libffmpegxx::utils::version() +
+                        " Current log level is " +
+                        logLevelToString(m_log_level);
+    *m_output_stream << salute << std::endl;
+  }
+}
+
+void LoggerImpl::logMessage(LogLevel const &level, std::string const &message) {
+  auto ostream = g_logger.getOutputStream();
+  if (!ostream) {
+    return;
+  }
+
+  auto const logLevelStr = logLevelToString(level);
+  *ostream << "[" << logLevelStr << "] " << message << std::endl;
+}
 
 LogLevel LoggerImpl::getLogLevel() const { return m_log_level; }
 
