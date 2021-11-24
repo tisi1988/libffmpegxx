@@ -1,8 +1,6 @@
 #pragma once
 
-extern "C" {
-#include <libavutil/rational.h>
-}
+#include <string>
 
 namespace libffmpegxx {
 namespace utils {
@@ -16,25 +14,31 @@ public:
    * @param num Numerator.
    * @param den Denominator.
    */
-  Rational(int num, int den) : m_rational({num, den}) {}
+  Rational(int num, int den);
 
   /**
    * @return the rational's numerator.
    */
-  int64_t num() const { return m_rational.num; }
+  int num() const;
 
   /**
    * @return the rational's denominator.
    */
-  int64_t den() const { return m_rational.den; }
+  int den() const;
 
   /**
    * @return the ratio as a floating point number.
    */
-  double ratio() const { return av_q2d(m_rational); }
+  double ratio() const;
+
+  /**
+   * @return the string representation of the rational.
+   */
+  std::string toString() const;
 
 private:
-  ::AVRational m_rational;
+  int _num{0};
+  int _den{0};
 };
 } // namespace utils
 } // namespace libffmpegxx
