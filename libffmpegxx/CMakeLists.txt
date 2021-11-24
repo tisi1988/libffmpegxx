@@ -5,12 +5,7 @@ find_library(AVFORMAT_LIBRARY avformat REQUIRED)
 find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(AVUTIL_LIBRARY avutil REQUIRED)
 
-file(GLOB ffmpegxx_SRC
-    "../include/*/*.h"
-    "../include/public/*/*.h"
-    "*/*.h"
-    "*/*.cpp"
-)
+file(GLOB_RECURSE ffmpegxx_SRC "${CMAKE_SOURCE_DIR}/libffmpegxx/*" "${CMAKE_SOURCE_DIR}/include/*")
 
 # add the executable
 add_library(ffmpegxx STATIC ${ffmpegxx_SRC})
