@@ -1,6 +1,6 @@
 #include "LoggerImpl.h"
 
-#include "public/Version.h"
+#include "public/utils/Version.h"
 
 #include <string>
 

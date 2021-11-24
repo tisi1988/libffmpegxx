@@ -1,6 +1,6 @@
 #pragma once
 
-#include "public/Logger.h"
+#include "public/utils/Logger.h"
 
 namespace libffmpegxx {
 namespace utils {
