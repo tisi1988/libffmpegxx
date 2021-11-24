@@ -6,8 +6,8 @@ find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(AVUTIL_LIBRARY avutil REQUIRED)
 
 file(GLOB ffmpegxx_SRC
-    "../include/*.h"
-    "../include/public/*.h"
+    "../include/*/*.h"
+    "../include/public/*/*.h"
     "*.h"
     "*.cpp"
 )
