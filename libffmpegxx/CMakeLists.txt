@@ -8,8 +8,8 @@ find_library(AVUTIL_LIBRARY avutil REQUIRED)
 file(GLOB ffmpegxx_SRC
     "../include/*/*.h"
     "../include/public/*/*.h"
-    "*.h"
-    "*.cpp"
+    "*/*.h"
+    "*/*.cpp"
 )
 
 # add the executable
