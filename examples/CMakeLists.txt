@@ -16,3 +16,4 @@ endfunction()
 # Add subdirectory for each example application
 add_subdirectory(version)
 add_subdirectory(logger)
+add_subdirectory(timestamp)
