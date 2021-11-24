@@ -22,7 +22,7 @@ std::string version() {
 std::string buildInfo() {
   return "libffmpegxx:\t" + version() + "\n" +
          "libavformat:\t" + STR(LIBAVFORMAT_VERSION) + "\n" +
-         "libavutil:\t" + STR(LIBAVUTIL_VERSION);
+         "libavutil:\t\t" + STR(LIBAVUTIL_VERSION);
 }
 };  // namespace utils
 };  // namespace libffmpegxx
