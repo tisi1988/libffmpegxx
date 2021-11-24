@@ -1,6 +1,6 @@
 #pragma once
 
-#include "public/utils/Rational.h"
+#include "../utils/Rational.h"
 
 #include <chrono>
 

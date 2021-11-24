@@ -13,6 +13,8 @@ namespace time {
  */
 class Timestamp {
 public:
+    static const Timestamp EMPTY;
+
   /**
    * @brief Timestamp constructor.
    * @param ts The timestamp as an integer value. Units based on timebase.
@@ -31,6 +33,11 @@ public:
    * @return the timestamp value in seconds.
    */
   Seconds toSeconds() const;
+
+  /**
+   * @return the timestamp value. Units based on timebase.
+   */
+  int64_t value() const;
 
 private:
   int64_t _ts{0};
