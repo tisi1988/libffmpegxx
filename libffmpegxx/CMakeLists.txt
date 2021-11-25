@@ -9,7 +9,6 @@ function(configureLibTarget TARGET_NAME)
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        OUTPUT_NAME ${PROJECT_NAME}
         )
 
     add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD
@@ -34,7 +33,7 @@ add_library(ffmpegxxShared SHARED ${SOURCEFILES} ${HEADERS})
 
 include_directories("${CMAKE_SOURCE_DIR}/libffmpegxx/include")
 
-configure_file(libffmpegxx_config.h.in "${CMAKE_SOURCE_DIR}/include/ffmpegxx_config.h")
+configure_file(libffmpegxx_config.h.in "${CMAKE_SOURCE_DIR}/libffmpegxx/include/ffmpegxx_config.h")
 
 configureLibTarget(ffmpegxxStatic)
 configureLibTarget(ffmpegxxShared)
