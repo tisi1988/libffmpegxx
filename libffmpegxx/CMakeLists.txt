@@ -5,17 +5,19 @@ find_library(AVFORMAT_LIBRARY avformat REQUIRED)
 find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(AVUTIL_LIBRARY avutil REQUIRED)
 
-file(GLOB_RECURSE ffmpegxx_SRC "${CMAKE_SOURCE_DIR}/libffmpegxx/*" "${CMAKE_SOURCE_DIR}/include/*")
+# Gather source and header files
+file(GLOB_RECURSE SOURCEFILES INC_ALL ${CMAKE_SOURCE_DIR}/libffmpegxx/*.cpp)
+file(GLOB_RECURSE HEADERS INC_ALL ${CMAKE_SOURCE_DIR}/libffmpegxx/include/*.h)
 
-# add the executable
-add_library(ffmpegxx STATIC ${ffmpegxx_SRC})
+# add the library target
+add_library(ffmpegxxStatic STATIC ${SOURCEFILES} ${HEADERS})
 
 # This would require also a set_target_properties(ffmpegxxShared ...)
 #add_library(ffmpegxxShared SHARED version.cc)
+include_directories("${CMAKE_SOURCE_DIR}/libffmpegxx/include")
 
 configure_file(libffmpegxx_config.h.in "${CMAKE_SOURCE_DIR}/include/ffmpegxx_config.h")
 
-include_directories("${CMAKE_SOURCE_DIR}/include")
 
 target_link_libraries(ffmpegxx PUBLIC -lavformat -lavutil)
 
