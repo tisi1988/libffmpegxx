@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "utils/time/Timestamp.h"
-#include "utils/time/time_defs.h"
+#include "time/Timestamp.h"
+#include "time/time_defs.h"
 
 int main() {
   // Lets create an original timebase
