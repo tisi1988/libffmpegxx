@@ -5,7 +5,6 @@
 #include "time_defs.h"
 
 namespace libffmpegxx {
-namespace utils {
 namespace time {
 
 /**
@@ -44,5 +43,4 @@ private:
   Timebase _tb{0, 0};
 };
 }; // namespace time
-}; // namespace utils
 }; // namespace libffmpegxx

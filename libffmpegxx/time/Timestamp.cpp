@@ -7,9 +7,8 @@ extern "C" {
 }
 
 namespace libffmpegxx {
-namespace utils {
 namespace time {
-const Timestamp Timestamp::EMPTY = Timestamp(0, utils::time::Timebase(0, 0));
+const Timestamp Timestamp::EMPTY = Timestamp(0, time::Timebase(0, 0));
 
 Timestamp::Timestamp(int64_t ts, const Timebase &tb) : _ts(ts), _tb(tb) {}
 
@@ -19,16 +18,15 @@ Timestamp Timestamp::toTimebase(Timebase const &tb) const {
   return Timestamp(std::round(num / den), tb);
 }
 
-utils::time::Seconds Timestamp::toSeconds() const {
+time::Seconds Timestamp::toSeconds() const {
   if (_ts <= 0 || _tb.num() == 0 || _tb.den() == 0) {
-    return utils::time::Seconds{0};
+    return time::Seconds{0};
   }
 
-  return utils::time::Seconds{static_cast<double>(_ts * _tb.num()) / _tb.den()};
+  return time::Seconds{static_cast<double>(_ts * _tb.num()) / _tb.den()};
 }
 
 int64_t Timestamp::value() const { return _ts; }
 
 }; // namespace time
-}; // namespace utils
 }; // namespace libffmpegxx
