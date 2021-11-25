@@ -1,1 +1,1 @@
-createTestApp(timestamp "-lffmpegxx -lavutil")
+createTestApp(timestamp "-lavutil")

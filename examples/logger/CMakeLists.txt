@@ -1,1 +1,1 @@
-createTestApp(logger "-lffmpegxx -lavutil")
+createTestApp(logger "-lavutil")
