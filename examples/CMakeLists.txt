@@ -11,6 +11,8 @@ function(createTestApp appName libraries)
     target_link_directories(${appName} PUBLIC "${CMAKE_BINARY_DIR}/lib")
 
     target_link_libraries(${appName} PUBLIC -lffmpegxxStatic ${libraries})
+
+    add_dependencies(${appName} ffmpegxxStatic)
 endfunction()
 
 # Add subdirectory for each example application
