@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace libffmpegcxx {
+namespace libffmpegxx {
 namespace avcodec {
 class IAVPacket;
 };
@@ -22,4 +22,4 @@ public:
   MediaInfo getMediaInfo() override;
 };
 }; // namespace avformat
-}; // namespace libffmpegcxx
+}; // namespace libffmpegxx
