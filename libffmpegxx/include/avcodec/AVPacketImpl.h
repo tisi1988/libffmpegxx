@@ -48,7 +48,7 @@ public:
 
 private:
   AVPacket *m_avPacket{nullptr};
-  time::Timebase m_tb{0, 0};
+  time::Timebase m_tb;
   IAVPacket::Type m_type{IAVPacket::Type::NONE};
 };
 } // namespace avcodec

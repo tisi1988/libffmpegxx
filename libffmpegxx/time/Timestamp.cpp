@@ -5,6 +5,7 @@
 
 extern "C" {
 #include <libavutil/rational.h>
+#include <libavutil/timestamp.h>
 }
 
 namespace libffmpegxx {
@@ -12,7 +13,7 @@ namespace time {
 const Timestamp Timestamp::EMPTY = Timestamp(0, time::Timebase());
 
 Timestamp::Timestamp(int64_t ts, const Timebase &tb) : m_tb(tb) {
-  if (ts < 0) {
+  if (ts != AV_NOPTS_VALUE && ts < 0) {
     throw std::runtime_error("Timestamp cannot be negative");
   }
   m_ts = ts;
