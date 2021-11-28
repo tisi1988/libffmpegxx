@@ -9,7 +9,7 @@ extern "C" {
 
 namespace libffmpegxx {
 namespace time {
-const Timestamp Timestamp::EMPTY = Timestamp(0, time::Timebase(0, 0));
+const Timestamp Timestamp::EMPTY = Timestamp(0, time::Timebase());
 
 Timestamp::Timestamp(int64_t ts, const Timebase &tb) : m_tb(tb) {
   if (ts < 0) {

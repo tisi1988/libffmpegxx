@@ -14,6 +14,10 @@ class Timebase : public utils::Rational {
 public:
   /**
    * @brief Timebase constructor.
+   */
+  Timebase();
+  /**
+   * @brief Timebase constructor.
    * @param num Numerator.
    * @param den Denominator.
    * @throws if any argument is <= 0.
