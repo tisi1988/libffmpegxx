@@ -1,0 +1,1 @@
+createTestApp(avpacket "-lavcodec -lavutil")

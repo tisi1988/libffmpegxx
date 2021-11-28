@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "../time/Timebase.h"
 #include "time_defs.h"
 
 namespace libffmpegxx {
@@ -12,12 +13,13 @@ namespace time {
  */
 class Timestamp {
 public:
-    static const Timestamp EMPTY;
+  static const Timestamp EMPTY;
 
   /**
    * @brief Timestamp constructor.
-   * @param ts The timestamp as an integer value. Units based on timebase.
+   * @param ts The timestamp as a positive integer. Units based on timebase.
    * @param tb The timebase of the timestamp.
+   * @throws if the timestamp is < 0.
    */
   Timestamp(int64_t ts, Timebase const &tb);
 
@@ -34,13 +36,34 @@ public:
   Seconds toSeconds() const;
 
   /**
+   * @brief Set a new timestamp value.
+   * @param seconds The new timestamp in seconds.
+   */
+  void set(int64_t const &ts);
+
+  /**
+   * @brief Computes the new timestamp value from given seconds using
+   * the internal Timebase.
+   * @param seconds The new timestamp in seconds.
+   * @note Notice the resulting timestamp value could be wrong if the
+   * given value is not an integer. However, computed result will
+   * be rounded to next integer value.
+   */
+  void set(time::Seconds const &seconds);
+
+  /**
    * @return the timestamp value. Units based on timebase.
    */
   int64_t value() const;
 
+  /**
+   * @return the Timestamp's Timebase.
+   */
+  time::Timebase getTimebase() const;
+
 private:
-  int64_t _ts{0};
-  Timebase _tb{0, 0};
+  int64_t m_ts{0};
+  Timebase m_tb{0, 0};
 };
 }; // namespace time
 }; // namespace libffmpegxx

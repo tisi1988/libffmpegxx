@@ -45,7 +45,20 @@ public:
  */
 class Logger {
 public:
+  /**
+   * @return the Logger instance.
+   */
   static ILogger *getLogger();
+
+  /**
+   * @brief Gets the error message associated to the given FFmpeg API error
+   * code. This helper is needed since the original FFmpeg marco av_err2str()
+   * does not work on C++. See
+   * https://www.mail-archive.com/ffmpeg-user@ffmpeg.org/msg30270.html
+   * @param error The FFmpeg API error code.
+   * @return the error message mapped to the error code.
+   */
+  static std::string avErrorToStr(int error);
 
 private:
   Logger() = default;

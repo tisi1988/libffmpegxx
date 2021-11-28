@@ -110,5 +110,10 @@ LogLevel LoggerImpl::getLogLevel() const { return m_log_level; }
 std::ostream *LoggerImpl::getOutputStream() const { return m_output_stream; }
 
 ILogger *Logger::getLogger() { return &g_logger; }
+
+std::string Logger::avErrorToStr(int error) {
+  char buf[AV_ERROR_MAX_STRING_SIZE] = {0};
+  return av_make_error_string(buf, AV_ERROR_MAX_STRING_SIZE, error);
+}
 }; // namespace utils
 }; // namespace libffmpegxx

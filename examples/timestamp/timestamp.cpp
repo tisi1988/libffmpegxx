@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "time/Timebase.h"
 #include "time/Timestamp.h"
 #include "time/time_defs.h"
 
@@ -22,4 +23,12 @@ int main() {
   std::cout << "New time stamp value " << ts2.value() << " with time base "
             << tb2.toString() << ". That is " << ts2.toSeconds().count() << "s"
             << std::endl;
+
+  try {
+    // Trying to create a timebase with zero or negative values
+    // will make the constructor raise an exception
+    libffmpegxx::time::Timebase(1, 0);
+  } catch (...) {
+    // Bad boy!
+  }
 }

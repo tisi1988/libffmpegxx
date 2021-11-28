@@ -9,6 +9,8 @@ namespace utils {
  */
 class Rational {
 public:
+  Rational() = default;
+
   /**
    * @brief Rational constructor.
    * @param num Numerator.
@@ -36,9 +38,12 @@ public:
    */
   std::string toString() const;
 
-private:
-  int _num{0};
-  int _den{0};
+  bool operator==(Rational const &other) const;
+  bool operator!=(Rational const &other) const;
+
+protected:
+  int m_num{0};
+  int m_den{0};
 };
 } // namespace utils
 } // namespace libffmpegxx
