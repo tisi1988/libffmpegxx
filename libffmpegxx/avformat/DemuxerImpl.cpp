@@ -2,7 +2,7 @@
 
 #include "avcodec/AVPacketImpl.h"
 
-namespace libffmpegcxx {
+namespace libffmpegxx {
 namespace avformat {
 IDemuxer *DemuxerFactory::create(std::string const &uri) {
   // TODO
@@ -32,4 +32,4 @@ MediaInfo DemuxerImpl::getMediaInfo() {
   // TODO
 }
 }; // namespace avformat
-}; // namespace libffmpegcxx
+}; // namespace libffmpegxx

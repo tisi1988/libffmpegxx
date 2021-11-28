@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace libffmpegcxx {
+namespace libffmpegxx {
 namespace avcodec {
 class IAVPacket;
 };
@@ -52,4 +52,4 @@ public:
   static IDemuxer *create(std::string const &uri);
 };
 }; // namespace avformat
-}; // namespace libffmpegcxx
+}; // namespace libffmpegxx

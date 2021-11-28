@@ -1,6 +1,6 @@
 #pragma once
 
-namespace libffmpegcxx {
+namespace libffmpegxx {
 namespace avformat {
 /**
  * @brief The MediaInfo struct contains all the information
@@ -10,4 +10,4 @@ struct MediaInfo {
   // TODO
 };
 }; // namespace avformat
-}; // namespace libffmpegcxx
+}; // namespace libffmpegxx
