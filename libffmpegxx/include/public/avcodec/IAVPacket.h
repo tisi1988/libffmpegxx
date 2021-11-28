@@ -22,7 +22,7 @@ public:
    */
   enum class Type { NONE = 0, VIDEO, AUDIO, SUBTITLE, DATA };
 
-  virtual ~IAVPacket() {}
+  virtual ~IAVPacket() = default;
 
   /**
    * @return the Presentation Timestamp. Timestamp (in Timebase units)
