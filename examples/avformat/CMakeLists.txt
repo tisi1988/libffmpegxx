@@ -1,0 +1,1 @@
+createTestApp(demuxer "-lavformat -lavutil")
