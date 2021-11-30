@@ -28,11 +28,10 @@ public:
   MediaInfo getMediaInfo() override;
 
 private:
-  avcodec::IAVPacket::Type getStreamType(int streamIdx) const;
+  StreamInfo::Type getStreamType(int streamIdx) const;
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};
-  MediaInfo m_mediaInfo;
   AVPacket *m_readingPacket{nullptr};
 };
 }; // namespace avformat

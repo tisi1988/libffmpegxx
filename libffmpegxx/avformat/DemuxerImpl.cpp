@@ -7,12 +7,8 @@
 #include <sstream>
 #include <vector>
 
-libffmpegxx::avformat::MediaInfo initializeMediaInfo(AVFormatContext *ctx) {
-  libffmpegxx::avformat::MediaInfo info;
-
-  // TODO
-
-  return info;
+libffmpegxx::avformat::StreamInfo buildStreamInfo(AVStream *stream) {
+  return libffmpegxx::avformat::StreamInfo{};
 }
 
 namespace libffmpegxx {
@@ -65,9 +61,7 @@ MediaInfo DemuxerImpl::open() {
   // Dump media info to the log
   av_dump_format(m_formatContext, 0, m_formatContext->url, false);
 
-  m_mediaInfo = initializeMediaInfo(m_formatContext);
-
-  return m_mediaInfo;
+  return getMediaInfo();
 }
 
 void DemuxerImpl::close() {
@@ -96,9 +90,15 @@ int DemuxerImpl::read(avcodec::IAVPacket &packet) {
   return error;
 }
 
-MediaInfo DemuxerImpl::getMediaInfo() { return m_mediaInfo; }
+MediaInfo DemuxerImpl::getMediaInfo() {
+  libffmpegxx::avformat::MediaInfo info{};
 
-avcodec::IAVPacket::Type DemuxerImpl::getStreamType(int streamIdx) const {
+  // TODO
+
+  return info;
+}
+
+StreamInfo::Type DemuxerImpl::getStreamType(int streamIdx) const {
   static std::vector<AVMediaType> const EXPECTED_TYPES = {
       AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_DATA,
       AVMEDIA_TYPE_SUBTITLE, AVMEDIA_TYPE_ATTACHMENT};
@@ -114,17 +114,17 @@ avcodec::IAVPacket::Type DemuxerImpl::getStreamType(int streamIdx) const {
 
   switch (foundType) {
   case AVMEDIA_TYPE_VIDEO:
-    return avcodec::IAVPacket::Type::VIDEO;
+    return StreamInfo::Type::VIDEO;
   case AVMEDIA_TYPE_AUDIO:
-    return avcodec::IAVPacket::Type::AUDIO;
+    return StreamInfo::Type::AUDIO;
   case AVMEDIA_TYPE_DATA:
-    return avcodec::IAVPacket::Type::DATA;
+    return StreamInfo::Type::DATA;
   case AVMEDIA_TYPE_SUBTITLE:
-    return avcodec::IAVPacket::Type::SUBTITLE;
+    return StreamInfo::Type::SUBTITLE;
   default:
     LOG_WARN("Could not find stream type for stream " +
              std::to_string(streamIdx) + " in media " + m_uri);
-    return avcodec::IAVPacket::Type::NONE;
+    return StreamInfo::Type::NONE;
   }
 }
 }; // namespace avformat

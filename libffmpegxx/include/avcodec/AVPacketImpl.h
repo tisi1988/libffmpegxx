@@ -15,7 +15,7 @@ class AVPacketImpl : public IAVPacket {
 public:
   AVPacketImpl();
   AVPacketImpl(AVPacket *packet, time::Timebase const &tb,
-               IAVPacket::Type type);
+               avformat::StreamInfo::Type type);
   explicit AVPacketImpl(const AVPacketImpl *const other);
   explicit AVPacketImpl(int size);
   ~AVPacketImpl();
@@ -27,7 +27,7 @@ public:
   int64_t getDuration() const override;
   const uint8_t *getRawData() const override;
   int getStreamIndex() const override;
-  IAVPacket::Type getContentType() const override;
+  avformat::StreamInfo::Type getContentType() const override;
   int64_t getPosition() const override;
   int getFlags() const override;
   int getSideDataCount() const override;
@@ -37,7 +37,7 @@ public:
                     time::Timestamp const &dts) override;
   void setTimestamp(time::Seconds const &seconds) override;
   void setData(uint8_t *dataPtr, int size) override;
-  void setContentType(Type const &type) override;
+  void setContentType(avformat::StreamInfo::Type const &type) override;
   void setDuration(int duration) override;
   void setStreamIndex(int index) override;
   void setFlags(int flags) override;
@@ -48,8 +48,8 @@ public:
 
 private:
   AVPacket *m_avPacket{nullptr};
-  time::Timebase m_tb;
-  IAVPacket::Type m_type{IAVPacket::Type::NONE};
+  time::Timebase m_tb{0, 0};
+  avformat::StreamInfo::Type m_type{avformat::StreamInfo::Type::NONE};
 };
 } // namespace avcodec
 } // namespace libffmpegxx
