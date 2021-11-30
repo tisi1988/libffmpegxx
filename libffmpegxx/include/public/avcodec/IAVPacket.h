@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../avformat/MediaInfo.h"
 #include "../time/time_defs.h"
 
 struct AVPacket;
@@ -17,11 +18,6 @@ namespace avcodec {
  */
 class IAVPacket {
 public:
-  /**
-   * @brief The Type enum defines the possible data types.
-   */
-  enum class Type { NONE = 0, VIDEO, AUDIO, SUBTITLE, DATA };
-
   virtual ~IAVPacket() = default;
 
   /**
@@ -64,9 +60,9 @@ public:
   virtual int getStreamIndex() const = 0;
 
   /**
-   * @return the type
+   * @return the media type
    */
-  virtual Type getContentType() const = 0;
+  virtual avformat::StreamInfo::Type getContentType() const = 0;
 
   /**
    * @return packet's position in the stream.
@@ -130,7 +126,7 @@ public:
    * @param type The new content type value.
    * @see Type
    */
-  virtual void setContentType(Type const &type) = 0;
+  virtual void setContentType(avformat::StreamInfo::Type const &type) = 0;
 
   /**
    * @brief Sets the packet duration.
@@ -200,7 +196,7 @@ public:
    * @return the new packet.
    */
   static IAVPacket *create(AVPacket *p, time::Timebase const &tb,
-                           IAVPacket::Type type);
+                           libffmpegxx::avformat::StreamInfo::Type type);
 
   /**
    * @brief Creates a new packet that references the same data as other packet.
