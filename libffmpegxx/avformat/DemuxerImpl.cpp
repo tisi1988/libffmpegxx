@@ -24,8 +24,7 @@ void DemuxerImpl::close() {
   // TODO
 }
 
-avcodec::IAVPacket *DemuxerImpl::read() {
-  // TODO
+int DemuxerImpl::read(avcodec::IAVPacket &packet) {
 }
 
 MediaInfo DemuxerImpl::getMediaInfo() {

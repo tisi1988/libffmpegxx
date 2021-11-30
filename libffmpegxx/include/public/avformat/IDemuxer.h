@@ -35,10 +35,13 @@ public:
   /**
    * @brief Reads a packet (if available) of content from the input. The packet
    * can belongs to any of the streams the input contains.
-   * @return the read packet
-   * @throws if there's an error while reading the content or EOF.
+   * @param packet The AVPacket where the data will be stored.
+   * @return FFmpeg API error code.
+   * @note The given packet will be cleared always before actually trying to
+   * read any content. If there's an issue reading the content it will remain
+   * empty.
    */
-  virtual avcodec::IAVPacket *read() = 0;
+  virtual int read(avcodec::IAVPacket &packet) = 0;
 
   /**
    * @return the multimedia info from the opened input.
