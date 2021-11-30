@@ -18,7 +18,7 @@ public:
 
   MediaInfo open() override;
   void close() override;
-  avcodec::IAVPacket *read() override;
+  int read(avcodec::IAVPacket &packet) override;
   MediaInfo getMediaInfo() override;
 };
 }; // namespace avformat
