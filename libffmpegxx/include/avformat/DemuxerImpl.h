@@ -1,8 +1,14 @@
 #pragma once
 
+#include "../public/avcodec/IAVPacket.h"
 #include "../public/avformat/IDemuxer.h"
+#include "../public/avformat/MediaInfo.h"
 
 #include <string>
+
+extern "C" {
+#include <libavformat/avformat.h>
+}
 
 namespace libffmpegxx {
 namespace avcodec {
@@ -20,6 +26,14 @@ public:
   void close() override;
   int read(avcodec::IAVPacket &packet) override;
   MediaInfo getMediaInfo() override;
+
+private:
+  avcodec::IAVPacket::Type getStreamType(int streamIdx) const;
+
+  std::string m_uri;
+  AVFormatContext *m_formatContext{nullptr};
+  MediaInfo m_mediaInfo;
+  AVPacket *m_readingPacket{nullptr};
 };
 }; // namespace avformat
 }; // namespace libffmpegxx
