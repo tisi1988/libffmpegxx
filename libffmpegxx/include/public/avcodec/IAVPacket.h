@@ -85,6 +85,12 @@ public:
   virtual AVPacketSideData *getSideData() const = 0;
 
   /**
+   * @brief Sets a new timebase for the packet.
+   * @param tb The new timebase.
+   */
+  virtual void setTimebase(time::Timebase const &tb) = 0;
+
+  /**
    * @brief Sets a new value for both PTS and DTS based the current Timebase.
    * @param ts New PTS/DTS timestamp.
    * @throws if the timebase of the given timestamp does not match the packet's

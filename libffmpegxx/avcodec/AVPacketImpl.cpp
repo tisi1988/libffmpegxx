@@ -96,9 +96,7 @@ const uint8_t *AVPacketImpl::getRawData() const {
 
 int AVPacketImpl::getStreamIndex() const { return m_avPacket->stream_index; }
 
-avformat::StreamType AVPacketImpl::getContentType() const {
-  return m_type;
-}
+avformat::StreamType AVPacketImpl::getContentType() const { return m_type; }
 
 int64_t AVPacketImpl::getPosition() const { return m_avPacket->pos; }
 
@@ -111,6 +109,8 @@ int AVPacketImpl::getSideDataCount() const {
 AVPacketSideData *AVPacketImpl::getSideData() const {
   return m_avPacket->side_data;
 }
+
+void AVPacketImpl::setTimebase(time::Timebase const &tb) { m_tb = tb; }
 
 void AVPacketImpl::setTimestamp(time::Timestamp const &ts) {
   if (ts.getTimebase() != m_tb) {
@@ -197,7 +197,7 @@ void AVPacketImpl::setPosition(int64_t position) { m_avPacket->pos = position; }
 
 void AVPacketImpl::clear() {
   av_packet_unref(m_avPacket);
-  m_tb = {0, 0};
+  m_tb = time::Timebase();
   m_type = avformat::StreamType::NONE;
 }
 
@@ -227,5 +227,7 @@ void AVPacketImpl::moveToPacket(IAVPacket *const dst) {
   av_packet_move_ref(packetImpl->m_avPacket, m_avPacket);
   clear();
 }
+
+AVPacket *AVPacketImpl::getWrappedPacket() const { return m_avPacket; }
 }; // namespace avcodec
 }; // namespace libffmpegxx

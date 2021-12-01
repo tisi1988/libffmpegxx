@@ -32,6 +32,7 @@ public:
   int getFlags() const override;
   int getSideDataCount() const override;
   AVPacketSideData *getSideData() const override;
+  void setTimebase(time::Timebase const &tb) override;
   void setTimestamp(time::Timestamp const &ts) override;
   void setTimestamp(time::Timestamp const &pts,
                     time::Timestamp const &dts) override;
@@ -46,9 +47,11 @@ public:
   void refToPacket(const IAVPacket *const other) override;
   void moveToPacket(IAVPacket *const dst) override;
 
+  AVPacket *getWrappedPacket() const;
+
 private:
   AVPacket *m_avPacket{nullptr};
-  time::Timebase m_tb{0, 0};
+  time::Timebase m_tb;
   avformat::StreamType m_type{avformat::StreamType::NONE};
 };
 } // namespace avcodec
