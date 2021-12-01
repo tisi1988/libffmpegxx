@@ -12,7 +12,7 @@ extern "C" {
 
 namespace libffmpegxx {
 namespace avcodec {
-class IAVPacket;
+class AVPacketImpl;
 };
 
 namespace avformat {
@@ -24,7 +24,7 @@ public:
 
   MediaInfo open(DemuxingOptions const &options = {}) override;
   void close() override;
-  int read(avcodec::IAVPacket &packet) override;
+  int read(avcodec::IAVPacket *packet) override;
   MediaInfo getMediaInfo() override;
 
 private:
@@ -32,7 +32,7 @@ private:
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};
-  AVPacket *m_readingPacket{nullptr};
+  avcodec::AVPacketImpl *m_readingPacket{nullptr};
 };
 }; // namespace avformat
 }; // namespace libffmpegxx

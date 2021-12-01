@@ -1,4 +1,6 @@
+#include "avcodec/IAVPacket.h"
 #include "avformat/IDemuxer.h"
+#include "time/Timestamp.h"
 #include "utils/Logger.h"
 
 #include <iostream>
@@ -108,4 +110,18 @@ int main() {
   //  auto const info = demuxer->open(options);
 
   std::cout << toString(info) << std::endl;
+
+  // then, start reading packets
+  libffmpegxx::avcodec::IAVPacket *packet =
+      libffmpegxx::avcodec::AVPacketFactory::create();
+  int error;
+  do {
+    error = demuxer->read(packet);
+    if (error >= 0) {
+      std::cout << "Packet from stream " << packet->getStreamIndex()
+                << std::endl;
+      std::cout << "Packet PTS " << packet->getPts().value() << " "
+                << packet->getPts().toSeconds().count() << "s" << std::endl;
+    }
+  } while (error >= 0);
 }

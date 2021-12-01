@@ -3,6 +3,7 @@
 #include "MediaInfo.h"
 
 #include <string>
+#include <unordered_map>
 
 namespace libffmpegxx {
 namespace avcodec {
@@ -45,7 +46,7 @@ public:
    * read any content. If there's an issue reading the content it will remain
    * empty.
    */
-  virtual int read(avcodec::IAVPacket &packet) = 0;
+  virtual int read(avcodec::IAVPacket *packet) = 0;
 
   /**
    * @return the multimedia info from the opened input.

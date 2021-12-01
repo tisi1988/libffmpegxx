@@ -2,6 +2,9 @@
 
 #include "avcodec/AVPacketImpl.h"
 #include "avformat/MediaInfoFactory.h"
+#include "public/avcodec/IAVPacket.h"
+#include "public/time/Timebase.h"
+#include "public/time/Timestamp.h"
 #include "utils/LoggerApi.h"
 #include "utils/exception.h"
 
@@ -19,7 +22,8 @@ IDemuxer *DemuxerFactory::create(std::string const &uri) {
 }
 
 DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {
-  m_readingPacket = av_packet_alloc();
+  m_readingPacket = dynamic_cast<avcodec::AVPacketImpl *>(
+      libffmpegxx::avcodec::AVPacketFactory::create());
 
   if (!m_readingPacket) {
     throw std::runtime_error("Unable to allocate packet for reading media " +
@@ -27,7 +31,11 @@ DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {
   }
 }
 
-DemuxerImpl::~DemuxerImpl() { this->DemuxerImpl::close(); }
+DemuxerImpl::~DemuxerImpl() {
+  this->DemuxerImpl::close();
+  delete m_readingPacket;
+}
+
 AVDictionary *parseOptions(DemuxingOptions const &options) {
   AVDictionary *opts = nullptr;
 
@@ -85,15 +93,14 @@ MediaInfo DemuxerImpl::open(const DemuxingOptions &options) {
   return getMediaInfo();
 }
 
-void DemuxerImpl::close() {
-  avformat_close_input(&m_formatContext);
-  av_packet_free(&m_readingPacket);
-}
+void DemuxerImpl::close() { avformat_close_input(&m_formatContext); }
 
-int DemuxerImpl::read(avcodec::IAVPacket &packet) {
-  packet.clear();
+int DemuxerImpl::read(avcodec::IAVPacket *packet) {
+  packet->clear();
 
-  int const error = av_read_frame(m_formatContext, m_readingPacket);
+  auto avpacket = m_readingPacket->getWrappedPacket();
+
+  int const error = av_read_frame(m_formatContext, avpacket);
 
   if (error < 0) {
     auto const msgError = "Error while reading " + m_uri + ": " +
@@ -102,11 +109,14 @@ int DemuxerImpl::read(avcodec::IAVPacket &packet) {
     return error;
   }
 
-  auto const tb =
-      m_formatContext->streams[m_readingPacket->stream_index]->time_base;
-  packet = libffmpegxx::avcodec::AVPacketImpl(
-      m_readingPacket, {tb.num, tb.den},
-      getStreamType(m_readingPacket->stream_index));
+  auto const tb = m_formatContext->streams[avpacket->stream_index]->time_base;
+  auto const streamTb = time::Timebase(tb.num, tb.den);
+  m_readingPacket->setContentType(getStreamType(avpacket->stream_index));
+  m_readingPacket->setTimebase(streamTb);
+  m_readingPacket->setTimestamp(time::Timestamp(avpacket->pts, streamTb),
+                                time::Timestamp(avpacket->dts, streamTb));
+
+  packet->refToPacket(m_readingPacket);
 
   return error;
 }
