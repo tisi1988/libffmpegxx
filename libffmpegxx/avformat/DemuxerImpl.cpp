@@ -1,6 +1,7 @@
 #include "avformat/DemuxerImpl.h"
 
 #include "avcodec/AVPacketImpl.h"
+#include "avformat/MediaInfoFactory.h"
 #include "utils/LoggerApi.h"
 #include "utils/exception.h"
 
@@ -91,14 +92,10 @@ int DemuxerImpl::read(avcodec::IAVPacket &packet) {
 }
 
 MediaInfo DemuxerImpl::getMediaInfo() {
-  libffmpegxx::avformat::MediaInfo info{};
-
-  // TODO
-
-  return info;
+  return libffmpegxx::avformat::MediaInfoFactory::build(m_formatContext);
 }
 
-StreamInfo::Type DemuxerImpl::getStreamType(int streamIdx) const {
+StreamType DemuxerImpl::getStreamType(int streamIdx) const {
   static std::vector<AVMediaType> const EXPECTED_TYPES = {
       AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_DATA,
       AVMEDIA_TYPE_SUBTITLE, AVMEDIA_TYPE_ATTACHMENT};
@@ -114,17 +111,17 @@ StreamInfo::Type DemuxerImpl::getStreamType(int streamIdx) const {
 
   switch (foundType) {
   case AVMEDIA_TYPE_VIDEO:
-    return StreamInfo::Type::VIDEO;
+    return StreamType::VIDEO;
   case AVMEDIA_TYPE_AUDIO:
-    return StreamInfo::Type::AUDIO;
+    return StreamType::AUDIO;
   case AVMEDIA_TYPE_DATA:
-    return StreamInfo::Type::DATA;
+    return StreamType::DATA;
   case AVMEDIA_TYPE_SUBTITLE:
-    return StreamInfo::Type::SUBTITLE;
+    return StreamType::SUBTITLE;
   default:
     LOG_WARN("Could not find stream type for stream " +
              std::to_string(streamIdx) + " in media " + m_uri);
-    return StreamInfo::Type::NONE;
+    return StreamType::NONE;
   }
 }
 }; // namespace avformat

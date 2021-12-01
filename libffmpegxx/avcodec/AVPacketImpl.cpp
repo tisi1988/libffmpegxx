@@ -15,7 +15,7 @@ namespace avcodec {
 IAVPacket *AVPacketFactory::create() { return new AVPacketImpl(); }
 
 IAVPacket *AVPacketFactory::create(AVPacket *p, time::Timebase const &tb,
-                                   avformat::StreamInfo::Type type) {
+                                   avformat::StreamType type) {
   return new AVPacketImpl(p, tb, type);
 }
 
@@ -47,7 +47,7 @@ AVPacketImpl::AVPacketImpl() {
 }
 
 AVPacketImpl::AVPacketImpl(AVPacket *packet, time::Timebase const &tb,
-                           avformat::StreamInfo::Type type)
+                           avformat::StreamType type)
     : m_avPacket(packet), m_tb(tb), m_type(type) {
   if (!m_avPacket) {
     throw std::runtime_error("AVPacket pointer cannot be nullptr");
@@ -96,7 +96,7 @@ const uint8_t *AVPacketImpl::getRawData() const {
 
 int AVPacketImpl::getStreamIndex() const { return m_avPacket->stream_index; }
 
-avformat::StreamInfo::Type AVPacketImpl::getContentType() const {
+avformat::StreamType AVPacketImpl::getContentType() const {
   return m_type;
 }
 
@@ -171,7 +171,7 @@ void AVPacketImpl::setData(uint8_t *dataPtr, int size) {
   }
 }
 
-void AVPacketImpl::setContentType(avformat::StreamInfo::Type const &type) {
+void AVPacketImpl::setContentType(avformat::StreamType const &type) {
   m_type = type;
 }
 
@@ -198,7 +198,7 @@ void AVPacketImpl::setPosition(int64_t position) { m_avPacket->pos = position; }
 void AVPacketImpl::clear() {
   av_packet_unref(m_avPacket);
   m_tb = {0, 0};
-  m_type = avformat::StreamInfo::Type::NONE;
+  m_type = avformat::StreamType::NONE;
 }
 
 void AVPacketImpl::refToPacket(const IAVPacket *const other) {

@@ -1,1 +1,1 @@
-createTestApp(demuxer "-lavformat -lavutil")
+createTestApp(demuxer "-lavcodec -lavformat -lavutil")

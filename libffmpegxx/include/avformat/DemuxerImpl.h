@@ -28,7 +28,7 @@ public:
   MediaInfo getMediaInfo() override;
 
 private:
-  StreamInfo::Type getStreamType(int streamIdx) const;
+  avformat::StreamType getStreamType(int streamIdx) const;
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};

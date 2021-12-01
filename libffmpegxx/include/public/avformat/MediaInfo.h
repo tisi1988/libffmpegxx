@@ -1,18 +1,139 @@
 #pragma once
 
+#include "../time/Timebase.h"
 #include "../time/time_defs.h"
 
 #include <map>
 #include <string>
+#include <variant>
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 
 namespace libffmpegxx {
 namespace avformat {
-struct StreamInfo {
-  /**
-   * @brief The Type enum defines the possible stream types.
-   */
-  enum class Type { NONE = 0, VIDEO, AUDIO, SUBTITLE, DATA };
+/**
+ * @brief The StreamType enum defines the possible stream data types.
+ */
+enum class StreamType { NONE = 0, VIDEO, AUDIO, SUBTITLE, DATA };
 
+/**
+ * @brief The BaseInfo struct stores the common data for any stream.
+ */
+struct StreamBaseInfo {
+  /**
+   * @brief Data bitrate in bits per second.
+   */
+  int64_t bitrate;
+
+  /**
+   * @brief Codec id.
+   */
+  AVCodecID codecId;
+
+  /**
+   * @brief Codec name.
+   */
+  std::string codecName;
+
+  /**
+   * @brief Stream duration in seconds.
+   */
+  time::Seconds duration;
+
+  /**
+   * @brief Stream timebase.
+   */
+  time::Timebase timebase;
+
+  /**
+   * @brief Stream start time.
+   */
+  time::Seconds startTime;
+
+  /**
+   * @brief Codec profile.
+   */
+  int profile;
+
+  /**
+   * @brief Codec level.
+   */
+  int level;
+};
+
+/**
+ * @brief The DataInfo struct holds the data of a video stream.
+ */
+struct VideoInfo : public StreamBaseInfo {
+  /**
+   * @brief Average framerate in frames per second.
+   */
+  double averageFramerate;
+
+  /**
+   * @brief Image format.
+   */
+  AVPixelFormat format;
+
+  /**
+   * @brief Amount of video frames.
+   */
+  int64_t frameCount;
+
+  /**
+   * @brief Video width.
+   */
+  int width;
+
+  /**
+   * @brief Video height.
+   */
+  int height;
+};
+
+/**
+ * @brief The DataInfo struct holds the data of a audio stream.
+ */
+struct AudioInfo : public StreamBaseInfo {
+  /**
+   * @brief Audio sample format.
+   */
+  AVSampleFormat format;
+
+  /**
+   * @brief Audio channel count.
+   */
+  int channelCount;
+
+  /**
+   * @brief Audio channel layout.
+   */
+  int channelLayout;
+
+  /**
+   * @brief Duration of an audio frame (in samples).
+   */
+  int frameSize;
+
+  /**
+   * @brief Audio sample rate in Hz.
+   */
+  int sampleRate;
+};
+
+/**
+ * @brief The DataInfo struct holds the data of a subtitle stream.
+ */
+struct SubtitleInfo : public StreamBaseInfo {};
+
+/**
+ * @brief The DataInfo struct holds the data of a data stream.
+ */
+struct DataInfo : public StreamBaseInfo {};
+
+struct StreamInfo {
   /**
    * @brief Stream index.
    */
@@ -21,9 +142,12 @@ struct StreamInfo {
   /**
    * @brief Stream type.
    */
-  Type type;
+  StreamType type;
 
-  // Codec, timebase, ...
+  /**
+   * @brief Contains the properties of the stream.
+   */
+  std::variant<VideoInfo, AudioInfo, SubtitleInfo, DataInfo> properties;
 };
 
 /**
@@ -60,11 +184,6 @@ struct MediaInfo {
    * @brief Media start time.
    */
   time::Seconds startTime;
-
-  /**
-   * @brief Media size in bytes.
-   */
-  size_t sizeBytes;
 };
 }; // namespace avformat
 }; // namespace libffmpegxx

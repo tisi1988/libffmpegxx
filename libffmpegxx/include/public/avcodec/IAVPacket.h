@@ -62,7 +62,7 @@ public:
   /**
    * @return the media type
    */
-  virtual avformat::StreamInfo::Type getContentType() const = 0;
+  virtual avformat::StreamType getContentType() const = 0;
 
   /**
    * @return packet's position in the stream.
@@ -126,7 +126,7 @@ public:
    * @param type The new content type value.
    * @see Type
    */
-  virtual void setContentType(avformat::StreamInfo::Type const &type) = 0;
+  virtual void setContentType(avformat::StreamType const &type) = 0;
 
   /**
    * @brief Sets the packet duration.
@@ -196,7 +196,7 @@ public:
    * @return the new packet.
    */
   static IAVPacket *create(AVPacket *p, time::Timebase const &tb,
-                           libffmpegxx::avformat::StreamInfo::Type type);
+                           libffmpegxx::avformat::StreamType type);
 
   /**
    * @brief Creates a new packet that references the same data as other packet.

@@ -1,5 +1,6 @@
 #include "avcodec/IAVPacket.h"
 
+#include "avformat/MediaInfo.h"
 #include "time/Timestamp.h"
 
 #include <iostream>
@@ -39,7 +40,7 @@ int main() {
 
   // Then wrap it using libffmpegxx's one
   libffmpegxx::time::Timebase tb{1, 48'000};
-  auto const type = libffmpegxx::avformat::StreamInfo::Type::VIDEO;
+  auto const type = libffmpegxx::avformat::StreamType::VIDEO;
   libffmpegxx::avcodec::IAVPacket *p2 =
       libffmpegxx::avcodec::AVPacketFactory::create(raw, tb, type);
 

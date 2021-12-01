@@ -13,9 +13,10 @@ namespace time {
 class Timebase : public utils::Rational {
 public:
   /**
-   * @brief Timebase constructor.
+   * @brief Timebase constructor
    */
   Timebase();
+
   /**
    * @brief Timebase constructor.
    * @param num Numerator.
