@@ -6,7 +6,7 @@ namespace libffmpegxx {
 namespace time {
 Timebase::Timebase() : Rational(1, 1) {}
 
-Timebase::Timebase(int num, int den) {
+Timebase::Timebase(int num, int den) : Rational(num, den) {
   if (num <= 0) {
     throw std::runtime_error("Timebase numerator cannot be <= 0");
   }
@@ -14,8 +14,6 @@ Timebase::Timebase(int num, int den) {
   if (den <= 0) {
     throw std::runtime_error("Timebase denominator cannot be <= 0");
   }
-
-  Rational(num, den);
 }
 
 bool Timebase::operator==(Timebase const &other) const {
