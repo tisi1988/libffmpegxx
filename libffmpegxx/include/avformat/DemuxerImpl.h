@@ -22,7 +22,7 @@ public:
 
   ~DemuxerImpl();
 
-  MediaInfo open() override;
+  MediaInfo open(DemuxingOptions const &options = {}) override;
   void close() override;
   int read(avcodec::IAVPacket &packet) override;
   MediaInfo getMediaInfo() override;

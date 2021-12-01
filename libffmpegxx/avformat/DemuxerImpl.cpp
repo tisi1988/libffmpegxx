@@ -28,8 +28,29 @@ DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {
 }
 
 DemuxerImpl::~DemuxerImpl() { this->DemuxerImpl::close(); }
+AVDictionary *parseOptions(DemuxingOptions const &options) {
+  AVDictionary *opts = nullptr;
 
-MediaInfo DemuxerImpl::open() {
+  for (auto &&[key, value] : options) {
+    std::string valueStr{""};
+
+    if (std::holds_alternative<int>(value)) {
+      valueStr = std::to_string(std::get<int>(value));
+    } else {
+      valueStr = std::get<std::string>(value);
+    }
+
+    int const err = av_dict_set(&opts, key.c_str(), valueStr.c_str(),
+                                AV_DICT_DONT_OVERWRITE);
+    if (err < 0) {
+      THROW_FFMPEG_ERR_DESCRIPTION("Error while parsing option " + key, err)
+    }
+  }
+
+  return opts;
+}
+
+MediaInfo DemuxerImpl::open(const DemuxingOptions &options) {
   if (m_formatContext) {
     throw std::runtime_error("Trying to open but it is already opened");
   }
@@ -40,10 +61,10 @@ MediaInfo DemuxerImpl::open() {
   }
 
   // TODO Implement option handling
-  AVDictionary *options{nullptr};
+  AVDictionary *opts = parseOptions(options);
 
   int error = avformat_open_input(&m_formatContext, m_uri.c_str(), nullptr,
-                                  options ? (&options) : nullptr);
+                                  opts ? (&opts) : nullptr);
 
   if (error < 0) {
     close();
@@ -51,8 +72,7 @@ MediaInfo DemuxerImpl::open() {
   }
 
   // Get streams info
-  error = avformat_find_stream_info(m_formatContext,
-                                    options ? (&options) : nullptr);
+  error = avformat_find_stream_info(m_formatContext, opts ? (&opts) : nullptr);
   if (error < 0) {
     close();
     THROW_FFMPEG_ERR_DESCRIPTION(

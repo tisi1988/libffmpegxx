@@ -97,7 +97,15 @@ int main() {
   auto demuxer = libffmpegxx::avformat::DemuxerFactory::create(
       "/home/ubuntu/Escriptori/test.mp4");
 
+  // You can open with no options
   auto const info = demuxer->open();
+
+  // Or create options. DemuxingOptions supports
+  // int or std::string values.
+  //  libffmpegxx::avformat::DemuxingOptions options;
+  //  options.insert({"analyzeduration", "20000000"});
+  //  options.insert({"probesize", 20000000});
+  //  auto const info = demuxer->open(options);
 
   std::cout << toString(info) << std::endl;
 }
