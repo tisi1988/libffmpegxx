@@ -39,3 +39,4 @@
 
 # QtCreator tmp files
 CMakeLists.txt.user
+libffmpegxx/include/ffmpegxx_config.h
