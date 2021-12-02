@@ -2,6 +2,7 @@
 
 #include "public/utils/Version.h"
 
+#include <sstream>
 #include <string>
 
 namespace libffmpegxx {
@@ -33,6 +34,9 @@ LogLevel av_log_levels_to_ffmpegxx_level(const int &loglevel) {
   }
 }
 
+std::stringstream g_ss;
+char g_buffer[1024]{'\0'};
+
 void log_cb(void *, int level, const char *szFmt, va_list varg) {
 
   auto ostream = g_logger.getOutputStream();
@@ -48,13 +52,27 @@ void log_cb(void *, int level, const char *szFmt, va_list varg) {
     return;
   }
 
-  char buffer[1024]{};
-
   int printPrefix = 1;
-  av_log_format_line(nullptr, level, szFmt, varg, buffer, sizeof(buffer),
-                     &printPrefix);
+  const int msgLength = av_log_format_line2(
+      nullptr, level, szFmt, varg, g_buffer, sizeof(g_buffer), &printPrefix);
 
-  g_logger.logMessage(mapped_log_level, buffer);
+  // FFmpeg can split a log line in several loggging callbacks
+  // we need to check if the current line ends with an end line char
+  // to log the accumulated string.
+  if (g_buffer[msgLength - 1] == '\n') {
+    // And some times the callback constains just the endl char
+    if (msgLength > 1) {
+      g_buffer[msgLength - 1] = '\0';
+      g_ss << g_buffer;
+    }
+    g_logger.logMessage(mapped_log_level, g_ss.str());
+    g_ss.str("");
+    g_ss.clear();
+  } else {
+    // Current message does not contain an endl char, just append
+    // its content for later.
+    g_ss << g_buffer;
+  }
 }
 
 LoggerImpl::LoggerImpl() {

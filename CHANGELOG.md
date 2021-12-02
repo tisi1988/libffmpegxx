@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.0.2-alpha] - 2021-12-01
+## [0.0.3-alpha] - XXXX-XX-XX
  
-First version of the library.
+### Fixed
+- FFmpeg logging message parsing
+- Set loglevel in Demuxer example app
+
+
+## [0.0.2-alpha] - 2021-12-01
  
 ### Added
 - Moved to C++17
@@ -16,8 +21,6 @@ First version of the library.
 
  
 ## [0.0.1-alpha] - 2021-11-28
- 
-First version of the library.
  
 ### Added
 - avcodec::IAVPacket and implementation

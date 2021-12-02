@@ -95,6 +95,7 @@ int main() {
   auto logger = libffmpegxx::utils::Logger::getLogger();
   std::ostream *oStream = &std::cout;
   logger->setOutputStream(oStream);
+  logger->setLogLevel(libffmpegxx::utils::LogLevel::INFO);
 
   auto demuxer = libffmpegxx::avformat::DemuxerFactory::create(
       "/home/ubuntu/Escriptori/test.mp4");
