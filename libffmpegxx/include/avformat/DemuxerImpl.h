@@ -32,7 +32,6 @@ private:
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};
-  avcodec::AVPacketImpl *m_readingPacket{nullptr};
 };
 }; // namespace avformat
 }; // namespace libffmpegxx

@@ -21,20 +21,9 @@ IDemuxer *DemuxerFactory::create(std::string const &uri) {
   return new DemuxerImpl(uri);
 }
 
-DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {
-  m_readingPacket = dynamic_cast<avcodec::AVPacketImpl *>(
-      libffmpegxx::avcodec::AVPacketFactory::create());
+DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {}
 
-  if (!m_readingPacket) {
-    throw std::runtime_error("Unable to allocate packet for reading media " +
-                             m_uri);
-  }
-}
-
-DemuxerImpl::~DemuxerImpl() {
-  this->DemuxerImpl::close();
-  delete m_readingPacket;
-}
+DemuxerImpl::~DemuxerImpl() { this->DemuxerImpl::close(); }
 
 AVDictionary *parseOptions(DemuxingOptions const &options) {
   AVDictionary *opts = nullptr;
@@ -98,8 +87,11 @@ void DemuxerImpl::close() { avformat_close_input(&m_formatContext); }
 int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   packet->clear();
 
-  auto avpacket = m_readingPacket->getWrappedPacket();
+  auto readingPacket = dynamic_cast<avcodec::AVPacketImpl *>(packet);
 
+  auto avpacket = readingPacket->getWrappedPacket();
+
+  av_packet_unref(avpacket);
   int const error = av_read_frame(m_formatContext, avpacket);
 
   if (error < 0) {
@@ -111,12 +103,10 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
 
   auto const tb = m_formatContext->streams[avpacket->stream_index]->time_base;
   auto const streamTb = time::Timebase(tb.num, tb.den);
-  m_readingPacket->setContentType(getStreamType(avpacket->stream_index));
-  m_readingPacket->setTimebase(streamTb);
-  m_readingPacket->setTimestamp(time::Timestamp(avpacket->pts, streamTb),
-                                time::Timestamp(avpacket->dts, streamTb));
-
-  packet->refToPacket(m_readingPacket);
+  readingPacket->setContentType(getStreamType(avpacket->stream_index));
+  readingPacket->setTimebase(streamTb);
+  readingPacket->setTimestamp(time::Timestamp(avpacket->pts, streamTb),
+                              time::Timestamp(avpacket->dts, streamTb));
 
   return error;
 }
