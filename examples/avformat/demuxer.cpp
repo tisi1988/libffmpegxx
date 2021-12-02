@@ -124,4 +124,7 @@ int main() {
                 << packet->getPts().toSeconds().count() << "s" << std::endl;
     }
   } while (error >= 0);
+
+  delete packet;
+  delete demuxer;
 }
