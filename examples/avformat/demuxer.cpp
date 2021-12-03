@@ -10,6 +10,7 @@ std::string toString(libffmpegxx::avcodec::IAVPacket *p) {
   // clang-format off
     std::stringstream ss;
     ss << "Packet data:";
+    ss << "\n\tType: " << static_cast<int>(p->getContentType());
     ss << "\n\tSize: " << p->getSize();
     ss << "\n\tStream idx: " << p->getStreamIndex();
     ss << "\n\tPTS: " << p->getPts().value();
