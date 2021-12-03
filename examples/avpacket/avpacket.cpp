@@ -6,7 +6,11 @@
 #include <iostream>
 
 extern "C" {
+#if LIBAVCODEC_VERSION_MAJOR >= 58 && LIBAVCODEC_VERSION_MINOR >=78 && LIBAVCODEC_VERSION_MICRO >= 100
 #include <libavcodec/packet.h>
+#else
+#include <libavcodec/avcodec.h>
+#endif
 }
 
 void printPacketData(libffmpegxx::avcodec::IAVPacket *p) {

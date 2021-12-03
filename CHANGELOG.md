@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - FFmpeg logging message parsing
 - Set loglevel in Demuxer example app
+- Fix AVPacket include for FFmpeg versions older than 4.3
 
 
 ## [0.0.2-alpha] - 2021-12-01
