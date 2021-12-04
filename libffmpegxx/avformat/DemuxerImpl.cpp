@@ -1,21 +1,22 @@
 #include "avformat/DemuxerImpl.h"
 
+#include "public/time/Timestamp.h"
+
 #include "avcodec/AVPacketImpl.h"
 #include "avformat/MediaInfoFactory.h"
-#include "public/avcodec/IAVPacket.h"
-#include "public/time/Timebase.h"
-#include "public/time/Timestamp.h"
 #include "utils/LoggerApi.h"
 #include "utils/exception.h"
 
 #include <sstream>
-#include <vector>
 
 libffmpegxx::avformat::StreamInfo buildStreamInfo(AVStream *stream) {
   return libffmpegxx::avformat::StreamInfo{};
 }
 
 namespace libffmpegxx {
+namespace utils {
+AVDictionary *toAVDictionary(AVOptions const &options);
+}
 namespace avformat {
 IDemuxer *DemuxerFactory::create(std::string const &uri) {
   return new DemuxerImpl(uri);
@@ -25,29 +26,7 @@ DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {}
 
 DemuxerImpl::~DemuxerImpl() { this->DemuxerImpl::close(); }
 
-AVDictionary *parseOptions(DemuxingOptions const &options) {
-  AVDictionary *opts = nullptr;
-
-  for (auto &&[key, value] : options) {
-    std::string valueStr{""};
-
-    if (std::holds_alternative<int>(value)) {
-      valueStr = std::to_string(std::get<int>(value));
-    } else {
-      valueStr = std::get<std::string>(value);
-    }
-
-    int const err = av_dict_set(&opts, key.c_str(), valueStr.c_str(),
-                                AV_DICT_DONT_OVERWRITE);
-    if (err < 0) {
-      THROW_FFMPEG_ERR_DESCRIPTION("Error while parsing option " + key, err)
-    }
-  }
-
-  return opts;
-}
-
-MediaInfo DemuxerImpl::open(const DemuxingOptions &options) {
+MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
   if (m_formatContext) {
     throw std::runtime_error("Trying to open but it is already opened");
   }
@@ -57,8 +36,7 @@ MediaInfo DemuxerImpl::open(const DemuxingOptions &options) {
     throw std::runtime_error("Error allocating format context.");
   }
 
-  // TODO Implement option handling
-  AVDictionary *opts = parseOptions(options);
+  AVDictionary *opts = utils::toAVDictionary(options);
 
   int error = avformat_open_input(&m_formatContext, m_uri.c_str(), nullptr,
                                   opts ? (&opts) : nullptr);

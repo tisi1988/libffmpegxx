@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../utils/AVOptions.h"
 #include "MediaInfo.h"
 
 #include <string>
@@ -11,9 +12,6 @@ class IAVPacket;
 };
 
 namespace avformat {
-using DemuxingOptions =
-    std::unordered_map<std::string, std::variant<int, std::string>>;
-
 /**
  * @brief The IDemuxer class demuxer the API of a demuxer.
  *
@@ -30,7 +28,7 @@ public:
    * @return the multimedia info from the opened input.
    * @throws if there's an error while opening the input.
    */
-  virtual MediaInfo open(DemuxingOptions const &options = {}) = 0;
+  virtual MediaInfo open(utils::AVOptions const &options = {}) = 0;
 
   /**
    * @brief Closes the demuxer.

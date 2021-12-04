@@ -1,5 +1,6 @@
 #include "avcodec/IAVPacket.h"
 #include "avformat/IDemuxer.h"
+#include "avformat/IMuxer.h"
 #include "time/Timestamp.h"
 #include "utils/Logger.h"
 
@@ -21,25 +22,9 @@ std::string toString(libffmpegxx::avcodec::IAVPacket *p) {
   return ss.str();
 }
 
-std::string toString(libffmpegxx::avformat::StreamBaseInfo const &info) {
-  std::stringstream ss;
-
-  ss << "\t\tCodec ID: " << info.codecId << std::endl;
-  ss << "\t\tCodec name: " << info.codecName << std::endl;
-  ss << "\t\tBitrate: " << info.bitrate << std::endl;
-  ss << "\t\tDuration: " << info.duration.count() << " seconds" << std::endl;
-  ss << "\t\tTimebase: " << info.timebase.toString() << std::endl;
-  ss << "\t\tStart time: " << info.startTime.count() << " seconds" << std::endl;
-  ss << "\t\tProfile: " << info.profile << std::endl;
-  ss << "\t\tLevel: " << info.level << std::endl;
-
-  return ss.str();
-}
-
 std::string toString(libffmpegxx::avformat::VideoInfo const &info) {
   std::stringstream ss;
 
-  ss << toString(static_cast<libffmpegxx::avformat::StreamBaseInfo>(info));
   ss << "\t\tAverage framerate: " << info.averageFramerate << std::endl;
   ss << "\t\tPixel format: " << info.format << std::endl;
   ss << "\t\tFrame count: " << info.frameCount << std::endl;
@@ -52,7 +37,6 @@ std::string toString(libffmpegxx::avformat::VideoInfo const &info) {
 std::string toString(libffmpegxx::avformat::AudioInfo const &info) {
   std::stringstream ss;
 
-  ss << toString(static_cast<libffmpegxx::avformat::StreamBaseInfo>(info));
   ss << "\t\tSample format: " << info.format << std::endl;
   ss << "\t\tChannel count: " << info.channelCount << std::endl;
   ss << "\t\tChannel layout: " << info.channelLayout << std::endl;
@@ -67,6 +51,14 @@ std::string toString(libffmpegxx::avformat::StreamInfo const &info) {
 
   ss << "\tStream ID: " << info.index << std::endl;
   ss << "\tStream type: " << static_cast<int>(info.type) << std::endl;
+  ss << "\tCodec ID: " << info.codecId << std::endl;
+  ss << "\tCodec name: " << info.codecName << std::endl;
+  ss << "\tBitrate: " << info.bitrate << std::endl;
+  ss << "\tDuration: " << info.duration.count() << " seconds" << std::endl;
+  ss << "\tTimebase: " << info.timebase.toString() << std::endl;
+  ss << "\tStart time: " << info.startTime.count() << " seconds" << std::endl;
+  ss << "\tProfile: " << info.profile << std::endl;
+  ss << "\tLevel: " << info.level << std::endl;
 
   switch (info.type) {
   case libffmpegxx::avformat::StreamType::VIDEO:
@@ -76,14 +68,10 @@ std::string toString(libffmpegxx::avformat::StreamInfo const &info) {
     ss << toString(std::get<libffmpegxx::avformat::AudioInfo>(info.properties));
     break;
   case libffmpegxx::avformat::StreamType::SUBTITLE:
-    ss << toString(
-        std::get<libffmpegxx::avformat::SubtitleInfo>(info.properties));
-    break;
   case libffmpegxx::avformat::StreamType::DATA:
-    ss << toString(std::get<libffmpegxx::avformat::DataInfo>(info.properties));
-    break;
   case libffmpegxx::avformat::StreamType::NONE:
-  default:;
+  default:
+    break;
   }
 
   return ss.str();
@@ -116,16 +104,23 @@ int main() {
       "/home/ubuntu/Escriptori/test.mp4");
 
   // You can open with no options
-  auto const info = demuxer->open();
+  auto info = demuxer->open();
 
   // Or create options. DemuxingOptions supports
   // int or std::string values.
-  //  libffmpegxx::avformat::DemuxingOptions options;
+  //  libffmpegxx::avformat::AVOptions options;
   //  options.insert({"analyzeduration", "20000000"});
   //  options.insert({"probesize", 20000000});
   //  auto const info = demuxer->open(options);
 
   std::cout << toString(info) << std::endl;
+
+  // Overwrite URI and format for muxing
+  info.uri = "/home/ubuntu/Escriptori/test.ts";
+  info.format = "mpegts";
+
+  auto muxer = libffmpegxx::avformat::MuxerFactory::create(info);
+  muxer->open({});
 
   // then, start reading packets
   libffmpegxx::avcodec::IAVPacket *packet =
@@ -136,8 +131,10 @@ int main() {
     if (error >= 0) {
       std::cout << toString(packet) << std::endl;
     }
+    muxer->write(packet);
   } while (error >= 0);
 
   delete packet;
   delete demuxer;
+  delete muxer;
 }

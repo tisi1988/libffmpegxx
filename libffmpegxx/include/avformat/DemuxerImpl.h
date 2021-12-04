@@ -19,10 +19,8 @@ namespace avformat {
 class DemuxerImpl : public IDemuxer {
 public:
   explicit DemuxerImpl(std::string const &uri);
-
-  ~DemuxerImpl();
-
-  MediaInfo open(DemuxingOptions const &options = {}) override;
+  ~DemuxerImpl() override;
+  MediaInfo open(utils::AVOptions const &options = {}) override;
   void close() override;
   int read(avcodec::IAVPacket *packet) override;
   MediaInfo getMediaInfo() override;

@@ -6,7 +6,8 @@
 #include <stdexcept>
 
 extern "C" {
-#if LIBAVCODEC_VERSION_MAJOR >= 58 && LIBAVCODEC_VERSION_MINOR >=78 && LIBAVCODEC_VERSION_MICRO >= 100
+#if LIBAVCODEC_VERSION_MAJOR >= 58 && LIBAVCODEC_VERSION_MINOR >= 78 &&        \
+    LIBAVCODEC_VERSION_MICRO >= 100
 #include <libavcodec/packet.h>
 #else
 #include <libavcodec/avcodec.h>
@@ -86,7 +87,9 @@ time::Timestamp AVPacketImpl::getPts() const {
   return time::Timestamp(m_avPacket->pts, m_tb);
 }
 
-time::Timestamp AVPacketImpl::getDts() const { return time::Timestamp::EMPTY; }
+time::Timestamp AVPacketImpl::getDts() const {
+  return time::Timestamp(m_avPacket->dts, m_tb);
+}
 
 time::Timebase AVPacketImpl::getTimebase() const { return m_tb; }
 

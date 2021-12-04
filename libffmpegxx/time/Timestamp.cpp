@@ -1,6 +1,5 @@
 #include "public/time/Timestamp.h"
 
-#include <cmath>
 #include <stdexcept>
 
 extern "C" {
@@ -20,9 +19,9 @@ Timestamp::Timestamp(int64_t ts, const Timebase &tb) : m_tb(tb) {
 }
 
 Timestamp Timestamp::toTimebase(Timebase const &tb) const {
-  double const num = m_ts * m_tb.num() * tb.den();
-  auto const den = m_tb.den() * tb.num();
-  return Timestamp(std::round(num / den), tb);
+  auto const newTs =
+      av_rescale_q(m_ts, {m_tb.num(), m_tb.den()}, {tb.num(), tb.den()});
+  return Timestamp(newTs, tb);
 }
 
 time::Seconds Timestamp::toSeconds() const {

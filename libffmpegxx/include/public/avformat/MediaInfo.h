@@ -2,10 +2,13 @@
 
 #include "../time/Timebase.h"
 #include "../time/time_defs.h"
+#include "../utils/AVOptions.h"
+#include "../utils/Rational.h"
 
 #include <map>
 #include <string>
 #include <variant>
+#include <vector>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -19,9 +22,144 @@ namespace avformat {
 enum class StreamType { NONE = 0, VIDEO, AUDIO, SUBTITLE, DATA };
 
 /**
- * @brief The BaseInfo struct stores the common data for any stream.
+ * @brief The DataInfo struct holds the data of a video stream.
  */
-struct StreamBaseInfo {
+struct VideoInfo {
+  /**
+   * @brief Average framerate in frames per second.
+   */
+  double averageFramerate;
+
+  /**
+   * @brief Image format.
+   */
+  AVPixelFormat format;
+
+  /**
+   * @brief Amount of video frames.
+   */
+  int64_t frameCount;
+
+  /**
+   * @brief Video width.
+   */
+  int width;
+
+  /**
+   * @brief Video height.
+   */
+  int height;
+
+  /**
+   * @brief Additional colorspace characteristics.
+   */
+  AVChromaLocation chromaLocation;
+  AVColorPrimaries colorPrimaries;
+  AVColorRange colorRange;
+  AVColorSpace colorSpace;
+  AVColorTransferCharacteristic colorTrc;
+
+  /**
+   * @brief The order of the fields in interlaced video.
+   */
+  AVFieldOrder fieldOrder;
+
+  /**
+   * @brief Number of delayed frames.
+   */
+  int videoDelay;
+
+  /**
+   * @brief The aspect ratio (width / height) which a single pixel
+   * should have when displayed.
+   */
+  utils::Rational sampleAspectRatio;
+};
+
+/**
+ * @brief The DataInfo struct holds the data of a audio stream.
+ */
+struct AudioInfo {
+  /**
+   * @brief Audio sample format.
+   */
+  AVSampleFormat format;
+
+  /**
+   * @brief Audio channel count.
+   */
+  int channelCount;
+
+  /**
+   * @brief Audio channel layout.
+   */
+  int channelLayout;
+
+  /**
+   * @brief Duration of an audio frame (in samples).
+   */
+  int frameSize;
+
+  /**
+   * @brief Audio sample rate in Hz.
+   */
+  int sampleRate;
+
+  /**
+   * @brief The number of bits per sample in the codedwords.
+   */
+  int bitsPerCodedSample;
+
+  /**
+   * @brief This is the number of valid bits in each output sample.
+   */
+  int bitsPerRawSample;
+
+  /**
+   * @brief The number of bytes per coded audio frame, required by some
+   * formats.
+   */
+  int blockAlign;
+
+  /**
+   * @brief The amount of padding (in samples) inserted by the encoder at
+   * the beginning of the audio.
+   */
+  int initialPadding;
+
+  /**
+   * @brief Number of samples to skip after a discontinuity.
+   */
+  int seekPreroll;
+
+  /**
+   * @brief The amount of padding (in samples) appended by the encoder to
+   * the end of the audio.
+   */
+  int trailingPadding;
+};
+
+/**
+ * @brief The DataInfo struct holds the data of a subtitle stream.
+ */
+struct SubtitleInfo {};
+
+/**
+ * @brief The DataInfo struct holds the data of a data stream.
+ */
+struct DataInfo {};
+
+struct StreamInfo {
+  /**
+   * @brief Stream index.
+   */
+  int index;
+
+  /**
+   * @brief Stream type.
+   */
+  StreamType type;
+
   /**
    * @brief Data bitrate in bits per second.
    */
@@ -61,88 +199,33 @@ struct StreamBaseInfo {
    * @brief Codec level.
    */
   int level;
-};
-
-/**
- * @brief The DataInfo struct holds the data of a video stream.
- */
-struct VideoInfo : public StreamBaseInfo {
-  /**
-   * @brief Average framerate in frames per second.
-   */
-  double averageFramerate;
 
   /**
-   * @brief Image format.
+   * @brief Additional information about the codec (corresponds to the AVI
+   * FOURCC).
    */
-  AVPixelFormat format;
+  uint32_t codecTag;
 
   /**
-   * @brief Amount of video frames.
+   * @brief General type of the encoded data.
    */
-  int64_t frameCount;
+  AVMediaType codecType;
 
   /**
-   * @brief Video width.
+   * @brief Extra binary data needed for initializing the decoder,
+   * codec-dependent.
    */
-  int width;
+  std::vector<uint8_t> extraData;
 
   /**
-   * @brief Video height.
+   * @brief Size of the extradata content in bytes.
    */
-  int height;
-};
-
-/**
- * @brief The DataInfo struct holds the data of a audio stream.
- */
-struct AudioInfo : public StreamBaseInfo {
-  /**
-   * @brief Audio sample format.
-   */
-  AVSampleFormat format;
+  int extraDataSize;
 
   /**
-   * @brief Audio channel count.
+   * @brief Contains the stream metadata.
    */
-  int channelCount;
-
-  /**
-   * @brief Audio channel layout.
-   */
-  int channelLayout;
-
-  /**
-   * @brief Duration of an audio frame (in samples).
-   */
-  int frameSize;
-
-  /**
-   * @brief Audio sample rate in Hz.
-   */
-  int sampleRate;
-};
-
-/**
- * @brief The DataInfo struct holds the data of a subtitle stream.
- */
-struct SubtitleInfo : public StreamBaseInfo {};
-
-/**
- * @brief The DataInfo struct holds the data of a data stream.
- */
-struct DataInfo : public StreamBaseInfo {};
-
-struct StreamInfo {
-  /**
-   * @brief Stream index.
-   */
-  int index;
-
-  /**
-   * @brief Stream type.
-   */
-  StreamType type;
+  utils::AVOptions metadata;
 
   /**
    * @brief Contains the properties of the stream.
@@ -176,7 +259,8 @@ struct MediaInfo {
   std::string format;
 
   /**
-   * @brief Full format name, like: "QuickTime/MPEG-4/Motion JPEG 2000 format".
+   * @brief Full format name, like: "QuickTime/MPEG-4/Motion JPEG 2000
+   * format".
    */
   std::string formatLongName;
 

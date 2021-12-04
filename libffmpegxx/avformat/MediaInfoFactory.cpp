@@ -5,6 +5,9 @@ extern "C" {
 }
 
 namespace libffmpegxx {
+namespace utils {
+extern AVOptions fromAVDictionary(AVDictionary *dict);
+}
 namespace avformat {
 void buildMediaInfo(MediaInfo &info, AVFormatContext *ctx) {
   info.duration = time::Seconds{ctx->duration * av_q2d(AV_TIME_BASE_Q)};
@@ -34,31 +37,23 @@ StreamType getTypeFromCodecId(AVMediaType codecType) {
   }
 }
 
-void buildGenericProperties(StreamBaseInfo &info, AVStream *stream) {
-  info.codecId = stream->codecpar->codec_id;
-  info.codecName = avcodec_get_name(info.codecId);
-  if (stream->duration != 0) {
-    info.duration = time::Seconds{stream->duration * av_q2d(stream->time_base)};
-  } else {
-    info.duration = time::Seconds{0.};
-  }
-  info.startTime = time::Seconds{
-      av_rescale_q(stream->start_time, stream->time_base, {1, 1})};
-  info.timebase = time::Timebase(stream->time_base.num, stream->time_base.den);
-  info.bitrate = stream->codecpar->bit_rate;
-  info.level = stream->codecpar->level;
-  info.profile = stream->codecpar->profile;
-}
-
 VideoInfo buildVideoStreamProperties(AVStream *stream) {
   VideoInfo info;
 
-  buildGenericProperties(info, stream);
   info.averageFramerate = av_q2d(stream->avg_frame_rate);
   info.frameCount = stream->nb_frames;
   info.format = static_cast<AVPixelFormat>(stream->codecpar->format);
   info.height = stream->codecpar->height;
   info.width = stream->codecpar->width;
+  info.sampleAspectRatio = {stream->codecpar->sample_aspect_ratio.num,
+                            stream->codecpar->sample_aspect_ratio.den};
+  info.chromaLocation = stream->codecpar->chroma_location;
+  info.colorPrimaries = stream->codecpar->color_primaries;
+  info.colorRange = stream->codecpar->color_range;
+  info.colorSpace = stream->codecpar->color_space;
+  info.colorTrc = stream->codecpar->color_trc;
+  info.fieldOrder = stream->codecpar->field_order;
+  info.videoDelay = stream->codecpar->video_delay;
 
   return info;
 }
@@ -66,12 +61,17 @@ VideoInfo buildVideoStreamProperties(AVStream *stream) {
 AudioInfo buildAudioStreamProperties(AVStream *stream) {
   AudioInfo info;
 
-  buildGenericProperties(info, stream);
   info.format = static_cast<AVSampleFormat>(stream->codecpar->format);
   info.channelCount = stream->codecpar->channels;
   info.channelLayout = stream->codecpar->channel_layout;
   info.frameSize = stream->codecpar->frame_size;
   info.sampleRate = stream->codecpar->sample_rate;
+  info.bitsPerCodedSample = stream->codecpar->bits_per_coded_sample;
+  info.bitsPerRawSample = stream->codecpar->bits_per_raw_sample;
+  info.blockAlign = stream->codecpar->block_align;
+  info.initialPadding = stream->codecpar->initial_padding;
+  info.seekPreroll = stream->codecpar->seek_preroll;
+  info.trailingPadding = stream->codecpar->trailing_padding;
 
   return info;
 }
@@ -79,15 +79,11 @@ AudioInfo buildAudioStreamProperties(AVStream *stream) {
 SubtitleInfo buildSubtitleStreamProperties(AVStream *stream) {
   SubtitleInfo info;
 
-  buildGenericProperties(info, stream);
-
   return info;
 }
 
 DataInfo buildDataStreamProperties(AVStream *stream) {
   DataInfo info;
-
-  buildGenericProperties(info, stream);
 
   return info;
 }
@@ -112,6 +108,27 @@ StreamInfo buildStreamInfo(AVStream *stream) {
     info.properties = buildDataStreamProperties(stream);
     break;
   }
+
+  info.codecId = stream->codecpar->codec_id;
+  info.codecName = avcodec_get_name(info.codecId);
+  if (stream->duration != 0) {
+    info.duration = time::Seconds{stream->duration * av_q2d(stream->time_base)};
+  } else {
+    info.duration = time::Seconds{0.};
+  }
+  info.startTime = time::Seconds{
+      av_rescale_q(stream->start_time, stream->time_base, {1, 1})};
+  info.timebase = time::Timebase(stream->time_base.num, stream->time_base.den);
+  info.bitrate = stream->codecpar->bit_rate;
+  info.level = stream->codecpar->level;
+  info.profile = stream->codecpar->profile;
+  info.codecTag = stream->codecpar->codec_tag;
+  info.codecType = stream->codecpar->codec_type;
+  info.extraDataSize = stream->codecpar->extradata_size;
+  info.extraData = std::vector<uint8_t>(stream->codecpar->extradata,
+                                        stream->codecpar->extradata +
+                                            stream->codecpar->extradata_size);
+  info.metadata = utils::fromAVDictionary(stream->metadata);
 
   return info;
 }
