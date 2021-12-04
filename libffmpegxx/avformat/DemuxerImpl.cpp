@@ -22,20 +22,38 @@ IDemuxer *DemuxerFactory::create(std::string const &uri) {
   return new DemuxerImpl(uri);
 }
 
+namespace {
+std::string buildDebugInfo(avcodec::IAVPacket *packet) {
+  std::stringstream ss;
+  ss << "Packet data:";
+  ss << "\n\tType: " << static_cast<int>(packet->getContentType());
+  ss << "\n\tSize: " << packet->getSize();
+  ss << "\n\tStream idx: " << packet->getStreamIndex();
+  ss << "\n\tPTS: " << packet->getPts().value();
+  ss << "\n\tDTS: " << packet->getDts().value();
+  ss << "\n\tTimebase: " << packet->getTimebase().toString();
+  ss << "\n\tDuration: " << packet->getDuration();
+
+  return ss.str();
+}
+} // namespace
+
 DemuxerImpl::DemuxerImpl(std::string const &uri) : m_uri(uri) {}
 
 DemuxerImpl::~DemuxerImpl() { this->DemuxerImpl::close(); }
 
 MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
   if (m_formatContext) {
-    throw std::runtime_error("Trying to open but it is already opened");
+    LOG_WARN("Trying to open demuxer for " + m_uri +
+             " but it is already opened");
+    return {};
   }
 
   std::lock_guard<std::mutex> l(m_ioMutex);
 
   m_formatContext = avformat_alloc_context();
   if (m_formatContext == nullptr) {
-    throw std::runtime_error("Error allocating format context.");
+    LOG_FATAL("Error allocating format context.");
   }
 
   AVDictionary *opts = utils::toAVDictionary(options);
@@ -45,16 +63,20 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
 
   if (error < 0) {
     close();
-    THROW_FFMPEG_ERR_DESCRIPTION("Error opening media: " + m_uri, error)
+    LOG_FATAL_FFMPEG_ERR("Error opening media: " + m_uri, error)
   }
+
+  LOG_INFO("Opened context for reading " + m_uri + " successfully")
 
   // Get streams info
   error = avformat_find_stream_info(m_formatContext, opts ? (&opts) : nullptr);
   if (error < 0) {
     close();
-    THROW_FFMPEG_ERR_DESCRIPTION(
+    LOG_FATAL_FFMPEG_ERR(
         "Could not open find stream info for media: " + m_uri, error)
   }
+
+  LOG_INFO("Stream info found for " + m_uri)
 
   // Dump media info to the log
   av_dump_format(m_formatContext, 0, m_formatContext->url, false);
@@ -64,6 +86,15 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
 
 void DemuxerImpl::close() {
   std::lock_guard<std::mutex> l(m_ioMutex);
+
+  if (m_formatContext) {
+    LOG_WARN("Trying to close demuxer for " + m_uri +
+             " but it is already closed");
+    return;
+  }
+
+  LOG_INFO("Closing demuxer from " + m_uri);
+
   avformat_close_input(&m_formatContext);
 }
 
@@ -71,6 +102,9 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   packet->clear();
 
   auto readingPacket = dynamic_cast<avcodec::AVPacketImpl *>(packet);
+  if (!readingPacket) {
+    LOG_FATAL("Could not handle given AVPAcket while reading from " + m_uri);
+  }
 
   auto avpacket = readingPacket->getWrappedPacket();
 
@@ -78,12 +112,14 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
 
   std::lock_guard<std::mutex> l(m_ioMutex);
 
+  LOG_DEBUG("Reading a packet from " + m_uri);
+
   int const error = av_read_frame(m_formatContext, avpacket);
 
   if (error < 0) {
     auto const msgError = "Error while reading " + m_uri + ": " +
                           utils::Logger::avErrorToStr(error);
-    LOG_WARN(msgError);
+    LOG_ERROR(msgError);
     return error;
   }
 
@@ -93,6 +129,9 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   readingPacket->setTimebase(streamTb);
   readingPacket->setTimestamp(time::Timestamp(avpacket->pts, streamTb),
                               time::Timestamp(avpacket->dts, streamTb));
+
+  LOG_DEBUG("Packet successfully read from " + m_uri + ". " +
+            buildDebugInfo(readingPacket));
 
   return error;
 }
@@ -111,6 +150,8 @@ StreamType DemuxerImpl::getStreamType(int streamIdx) const {
     int foundIndex = av_find_best_stream(m_formatContext, mediaType, streamIdx,
                                          -1, nullptr, 0);
     if (foundIndex == streamIdx) {
+      LOG_DEBUG("Stream " + std::to_string(foundIndex) + " is type " +
+                std::to_string(mediaType));
       foundType = mediaType;
     }
   }

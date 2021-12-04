@@ -26,7 +26,7 @@ AVDictionary *toAVDictionary(AVOptions const &options) {
     int const err = av_dict_set(&opts, key.c_str(), valueStr.c_str(),
                                 AV_DICT_DONT_OVERWRITE);
     if (err < 0) {
-      THROW_FFMPEG_ERR_DESCRIPTION("Error while parsing option " + key, err)
+      LOG_FATAL_FFMPEG_ERR("Error while parsing option " + key, err)
     }
   }
 

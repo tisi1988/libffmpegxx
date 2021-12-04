@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Implemented muxing
 - Replaced example app for Demuxer with a remuxing (Demuxer/Muxer) example
 - Make Logger, Demuxer, Muxer thread-safe
+- Implemented more logging
+- Remuxing app does not print IAVPacket info always. This can be enabled through log level DEBUG
 
 
 ## [0.0.2-alpha] - 2021-12-01

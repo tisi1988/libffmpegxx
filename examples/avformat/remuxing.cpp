@@ -7,21 +7,6 @@
 #include <iostream>
 #include <sstream>
 
-std::string toString(libffmpegxx::avcodec::IAVPacket *p) {
-  // clang-format off
-    std::stringstream ss;
-    ss << "Packet data:";
-    ss << "\n\tType: " << static_cast<int>(p->getContentType());
-    ss << "\n\tSize: " << p->getSize();
-    ss << "\n\tStream idx: " << p->getStreamIndex();
-    ss << "\n\tPTS: " << p->getPts().value();
-    ss << "\n\tDTS: " << p->getDts().value();
-    ss << "\n\tTimebase: " << p->getTimebase().toString();
-    ss << "\n\tDuration: " << p->getDuration();
-  // clang-format on
-  return ss.str();
-}
-
 std::string toString(libffmpegxx::avformat::VideoInfo const &info) {
   std::stringstream ss;
 
@@ -128,9 +113,6 @@ int main() {
   int error;
   do {
     error = demuxer->read(packet);
-    if (error >= 0) {
-      std::cout << toString(packet) << std::endl;
-    }
     muxer->write(packet);
   } while (error >= 0);
 

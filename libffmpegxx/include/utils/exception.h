@@ -1,9 +1,10 @@
 #pragma once
 
-#define THROW_FFMPEG_ERR_DESCRIPTION(description, errCode)                     \
+#include "utils/LoggerApi.h"
+
+#define LOG_FATAL_FFMPEG_ERR(description, errCode)                     \
   std::stringstream sstream;                                                   \
   sstream << description;                                                      \
   sstream << "Error code " << std::to_string(errCode) << ": ";                 \
   sstream << utils::Logger::avErrorToStr(errCode);                             \
-  throw std::runtime_error(sstream.str());
-  
+  LOG_FATAL(sstream.str());
