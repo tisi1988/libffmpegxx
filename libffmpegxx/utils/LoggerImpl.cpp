@@ -2,12 +2,14 @@
 
 #include "public/utils/Version.h"
 
+#include <mutex>
 #include <sstream>
 #include <string>
 
 namespace libffmpegxx {
 namespace utils {
 static LoggerImpl g_logger;
+static std::mutex g_ostreamMutex;
 
 LogLevel av_log_levels_to_ffmpegxx_level(const int &loglevel) {
   switch (loglevel) {
@@ -39,9 +41,12 @@ char g_buffer[1024]{'\0'};
 
 void log_cb(void *, int level, const char *szFmt, va_list varg) {
 
-  auto ostream = g_logger.getOutputStream();
-  if (!ostream) {
-    return;
+  {
+    std::lock_guard<std::mutex> l(g_ostreamMutex);
+    auto ostream = g_logger.getOutputStream();
+    if (!ostream) {
+      return;
+    }
   }
 
   LogLevel const mapped_log_level = av_log_levels_to_ffmpegxx_level(level);
@@ -103,6 +108,7 @@ std::string logLevelToString(LogLevel level) {
 }
 
 void LoggerImpl::setOutputStream(std::ostream *os) {
+  std::lock_guard<std::mutex> l(g_ostreamMutex);
   m_output_stream = os;
   if (m_output_stream) {
     auto const salute = logLevelToString(LogLevel::INFO) + " libffmpegxx v" +
@@ -114,13 +120,13 @@ void LoggerImpl::setOutputStream(std::ostream *os) {
 }
 
 void LoggerImpl::logMessage(LogLevel const &level, std::string const &message) {
-  auto ostream = g_logger.getOutputStream();
-  if (!ostream) {
+  std::lock_guard<std::mutex> l(g_ostreamMutex);
+  if (!m_output_stream) {
     return;
   }
 
   auto const logLevelStr = logLevelToString(level);
-  *ostream << "[" << logLevelStr << "] " << message << std::endl;
+  *m_output_stream << "[" << logLevelStr << "] " << message << std::endl;
 }
 
 LogLevel LoggerImpl::getLogLevel() const { return m_log_level; }

@@ -4,6 +4,7 @@
 #include "../public/avformat/IDemuxer.h"
 #include "../public/avformat/MediaInfo.h"
 
+#include <mutex>
 #include <string>
 
 extern "C" {
@@ -23,13 +24,15 @@ public:
   MediaInfo open(utils::AVOptions const &options = {}) override;
   void close() override;
   int read(avcodec::IAVPacket *packet) override;
-  MediaInfo getMediaInfo() override;
+  MediaInfo getMediaInfo() const override;
 
 private:
   avformat::StreamType getStreamType(int streamIdx) const;
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};
+
+  std::mutex m_ioMutex;
 };
 }; // namespace avformat
 }; // namespace libffmpegxx

@@ -2,6 +2,8 @@
 
 #include "public/avformat/IMuxer.h"
 
+#include <mutex>
+
 extern "C" {
 #include <libavformat/avformat.h>
 }
@@ -19,6 +21,8 @@ public:
 private:
   AVFormatContext *m_formatContext{nullptr};
   MediaInfo m_mediaInfo;
+
+  std::mutex m_ioMutex;
 };
 }; // namespace avformat
 }; // namespace libffmpegxx
