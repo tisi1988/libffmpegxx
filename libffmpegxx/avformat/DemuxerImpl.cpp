@@ -31,6 +31,8 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
     throw std::runtime_error("Trying to open but it is already opened");
   }
 
+  std::lock_guard<std::mutex> l(m_ioMutex);
+
   m_formatContext = avformat_alloc_context();
   if (m_formatContext == nullptr) {
     throw std::runtime_error("Error allocating format context.");
@@ -60,7 +62,10 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
   return getMediaInfo();
 }
 
-void DemuxerImpl::close() { avformat_close_input(&m_formatContext); }
+void DemuxerImpl::close() {
+  std::lock_guard<std::mutex> l(m_ioMutex);
+  avformat_close_input(&m_formatContext);
+}
 
 int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   packet->clear();
@@ -70,6 +75,9 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   auto avpacket = readingPacket->getWrappedPacket();
 
   av_packet_unref(avpacket);
+
+  std::lock_guard<std::mutex> l(m_ioMutex);
+
   int const error = av_read_frame(m_formatContext, avpacket);
 
   if (error < 0) {

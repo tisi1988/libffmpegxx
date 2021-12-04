@@ -2,6 +2,8 @@
 
 #include "public/utils/Logger.h"
 
+#include <atomic>
+
 namespace libffmpegxx {
 namespace utils {
 class LoggerImpl : public ILogger {
@@ -19,7 +21,7 @@ public:
 private:
   void avlog_cb(void *, int level, const char *szFmt, va_list varg);
 
-  LogLevel m_log_level{LogLevel::QUIET};
+  std::atomic<LogLevel> m_log_level{LogLevel::QUIET};
   std::ostream *m_output_stream{nullptr};
 };
 }; // namespace utils

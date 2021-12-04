@@ -30,6 +30,8 @@ void MuxerImpl::open(utils::AVOptions const &options) {
     throw std::runtime_error("Muxer to " + m_mediaInfo.uri + " already opened");
   }
 
+  std::lock_guard<std::mutex> l(m_ioMutex);
+
   int error = avformat_alloc_output_context2(&m_formatContext, nullptr,
                                              m_mediaInfo.format.c_str(),
                                              m_mediaInfo.uri.c_str());
@@ -65,6 +67,8 @@ void MuxerImpl::open(utils::AVOptions const &options) {
 }
 
 void MuxerImpl::close() {
+  std::lock_guard<std::mutex> l(m_ioMutex);
+
   if (m_formatContext) {
     if (m_formatContext->pb) {
       avio_flush(m_formatContext->pb);
@@ -98,11 +102,14 @@ void MuxerImpl::write(avcodec::IAVPacket *packet) {
                              ". " + packetInfo.str());
   }
 
+  auto const pts = packetImpl->getPts();
+  auto const dts = packetImpl->getDts();
+
+  std::lock_guard<std::mutex> l(m_ioMutex);
+
   auto const streamTb =
       m_formatContext->streams[packetImpl->getStreamIndex()]->time_base;
   auto const tb = time::Timebase({streamTb.num, streamTb.den});
-  auto const pts = packetImpl->getPts();
-  auto const dts = packetImpl->getDts();
 
   packetImpl->setTimebase(tb);
   packetImpl->setTimestamp(pts.toTimebase(tb), dts.toTimebase(tb));

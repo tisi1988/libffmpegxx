@@ -4,6 +4,7 @@
 #include "../public/avformat/IDemuxer.h"
 #include "../public/avformat/MediaInfo.h"
 
+#include <mutex>
 #include <string>
 
 extern "C" {
@@ -30,6 +31,8 @@ private:
 
   std::string m_uri;
   AVFormatContext *m_formatContext{nullptr};
+
+  std::mutex m_ioMutex;
 };
 }; // namespace avformat
 }; // namespace libffmpegxx
