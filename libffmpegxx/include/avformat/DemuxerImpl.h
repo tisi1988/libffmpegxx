@@ -23,7 +23,7 @@ public:
   MediaInfo open(utils::AVOptions const &options = {}) override;
   void close() override;
   int read(avcodec::IAVPacket *packet) override;
-  MediaInfo getMediaInfo() override;
+  MediaInfo getMediaInfo() const override;
 
 private:
   avformat::StreamType getStreamType(int streamIdx) const;

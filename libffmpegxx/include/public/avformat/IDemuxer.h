@@ -50,7 +50,7 @@ public:
    * @return the multimedia info from the opened input.
    * @throws if the input has not been opened before.
    */
-  virtual MediaInfo getMediaInfo() = 0;
+  virtual MediaInfo getMediaInfo() const = 0;
 };
 
 class DemuxerFactory {

@@ -89,7 +89,7 @@ int DemuxerImpl::read(avcodec::IAVPacket *packet) {
   return error;
 }
 
-MediaInfo DemuxerImpl::getMediaInfo() {
+MediaInfo DemuxerImpl::getMediaInfo() const {
   return libffmpegxx::avformat::MediaInfoFactory::build(m_formatContext);
 }
 
