@@ -3,9 +3,6 @@
 #include "../avformat/MediaInfo.h"
 #include "../time/time_defs.h"
 
-struct AVPacket;
-struct AVPacketSideData;
-
 namespace libffmpegxx {
 namespace time {
 class Timebase;
@@ -91,7 +88,7 @@ public:
   virtual void setTimebase(time::Timebase const &tb) = 0;
 
   /**
-   * @brief Sets a new value for both PTS and DTS based the current Timebase.
+   * @brief Sets a new value for both PTS and DTS based on the current Timebase.
    * @param ts New PTS/DTS timestamp.
    * @throws if the timebase of the given timestamp does not match the packet's
    * one.
@@ -120,7 +117,10 @@ public:
   virtual void setTimestamp(time::Seconds const &seconds) = 0;
 
   /**
-   * @brief Sets the data for the AVPacket. Any previous data is cleared out.
+   * @brief Sets the data for the AVPacket with a previously allocated data. Any
+   * previous data is cleared out.
+   * @note The data is then owned by the packet. The caller may not access the
+   * data through other means.
    * @param dataPtr The new data pointer.
    * @param size The size of the data in bytes.
    * @throws if size is negative or if size == 0 but dataPtr is not nullptr.
@@ -188,7 +188,7 @@ public:
 class AVPacketFactory {
 public:
   /**
-   * @brief Creates an empty packet with an empty Timebase.
+   * @brief Creates an empty packet.
    * @return the new packet.
    */
   static IAVPacket *create();

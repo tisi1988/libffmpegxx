@@ -2,7 +2,9 @@
 
 #include "public/time/Timestamp.h"
 #include "utils/LoggerApi.h"
+#include "utils/exception.h"
 
+#include <sstream>
 #include <stdexcept>
 
 extern "C" {
@@ -28,8 +30,7 @@ IAVPacket *AVPacketFactory::create(const IAVPacket *const other) {
   auto const packetImpl = dynamic_cast<const AVPacketImpl *const>(other);
 
   if (!packetImpl) {
-    throw std::runtime_error(
-        "Could not handle packet while trying to reference it");
+    LOG_FATAL("Could not handle packet while trying to reference it");
   }
 
   return new AVPacketImpl(packetImpl);
@@ -37,17 +38,16 @@ IAVPacket *AVPacketFactory::create(const IAVPacket *const other) {
 
 IAVPacket *AVPacketFactory::create(int size) {
   if (size < 0) {
-    throw std::runtime_error("Could not create packet with negative size");
+    LOG_FATAL("Could not create packet with negative size");
   }
 
   return new AVPacketImpl(size);
 }
 
 AVPacketImpl::AVPacketImpl() {
-  // We create and initialise the packet contents
   m_avPacket = av_packet_alloc();
   if (!m_avPacket) {
-    throw std::runtime_error("Could not allocate AVPacket");
+    LOG_FATAL("Could not allocate AVPacket")
   }
 }
 
@@ -55,13 +55,13 @@ AVPacketImpl::AVPacketImpl(AVPacket *packet, time::Timebase const &tb,
                            avformat::StreamType type)
     : m_avPacket(packet), m_tb(tb), m_type(type) {
   if (!m_avPacket) {
-    throw std::runtime_error("AVPacket pointer cannot be nullptr");
+    LOG_FATAL("AVPacket pointer cannot be null")
   }
 }
 
 AVPacketImpl::AVPacketImpl(const AVPacketImpl *const other) : AVPacketImpl() {
   if (!other) {
-    throw std::runtime_error("AVPacket pointer cannot be nullptr");
+    LOG_FATAL("AVPacket pointer cannot be nullptr");
   }
 
   this->AVPacketImpl::refToPacket(other);
@@ -71,9 +71,8 @@ AVPacketImpl::AVPacketImpl(int size) {
   int const err = av_new_packet(m_avPacket, size);
 
   if (err != 0) {
-    throw std::runtime_error("Could not allocate AVPacket with size " +
-                             std::to_string(size) + ": " +
-                             utils::Logger::avErrorToStr(err));
+    LOG_FATAL_FFMPEG_ERR(
+        "Could not allocate AVPacket with size " + std::to_string(size), err);
   }
 }
 
@@ -83,13 +82,9 @@ AVPacketImpl::~AVPacketImpl() {
   }
 }
 
-time::Timestamp AVPacketImpl::getPts() const {
-  return time::Timestamp(m_avPacket->pts, m_tb);
-}
+time::Timestamp AVPacketImpl::getPts() const { return {m_avPacket->pts, m_tb}; }
 
-time::Timestamp AVPacketImpl::getDts() const {
-  return time::Timestamp(m_avPacket->dts, m_tb);
-}
+time::Timestamp AVPacketImpl::getDts() const { return {m_avPacket->dts, m_tb}; }
 
 time::Timebase AVPacketImpl::getTimebase() const { return m_tb; }
 
@@ -98,7 +93,11 @@ int AVPacketImpl::getSize() const { return m_avPacket->size; }
 int64_t AVPacketImpl::getDuration() const { return m_avPacket->duration; }
 
 const uint8_t *AVPacketImpl::getRawData() const {
-  return m_avPacket->buf->data;
+  if (m_avPacket->buf->data) {
+    return m_avPacket->buf->data;
+  } else {
+    return m_avPacket->data;
+  }
 }
 
 int AVPacketImpl::getStreamIndex() const { return m_avPacket->stream_index; }
@@ -121,9 +120,8 @@ void AVPacketImpl::setTimebase(time::Timebase const &tb) { m_tb = tb; }
 
 void AVPacketImpl::setTimestamp(time::Timestamp const &ts) {
   if (ts.getTimebase() != m_tb) {
-    throw std::runtime_error(
-        "Timestamp must match the packet's timebase! Passed: " +
-        ts.getTimebase().toString() + " AVPacket: " + m_tb.toString());
+    LOG_FATAL("Timestamp must match the packet's timebase! Passed: " +
+              ts.getTimebase().toString() + " AVPacket: " + m_tb.toString());
   }
 
   m_avPacket->pts = m_avPacket->dts = ts.value();
@@ -132,15 +130,14 @@ void AVPacketImpl::setTimestamp(time::Timestamp const &ts) {
 void AVPacketImpl::setTimestamp(time::Timestamp const &pts,
                                 time::Timestamp const &dts) {
   if (pts.getTimebase() != dts.getTimebase()) {
-    throw std::runtime_error(
-        "Both PTS and DTS must have the same timebase! PTS: " +
-        pts.getTimebase().toString() + " DTS: " + pts.getTimebase().toString());
+    LOG_FATAL("Both PTS and DTS must have the same timebase! PTS: " +
+              pts.getTimebase().toString() +
+              " DTS: " + pts.getTimebase().toString());
   }
 
   if (pts.getTimebase() != m_tb || dts.getTimebase() != m_tb) {
-    throw std::runtime_error(
-        "Both PTS and DTS must match the packet's timebase! PTS/DTS: " +
-        pts.getTimebase().toString() + " AVPacket: " + m_tb.toString());
+    LOG_FATAL("Both PTS and DTS must match the packet's timebase! PTS/DTS: " +
+              pts.getTimebase().toString() + " AVPacket: " + m_tb.toString());
   }
 
   m_avPacket->pts = pts.value();
@@ -149,10 +146,9 @@ void AVPacketImpl::setTimestamp(time::Timestamp const &pts,
 
 void AVPacketImpl::setTimestamp(time::Seconds const &seconds) {
   if (m_avPacket->pts != m_avPacket->dts) {
-    throw std::runtime_error(
-        "Could not set timestamp since PTS and DTA do not match. " +
-        std::to_string(m_avPacket->pts) +
-        " != " + std::to_string(m_avPacket->dts));
+    LOG_FATAL("Could not set timestamp since PTS and DTA do not match. " +
+              std::to_string(m_avPacket->pts) +
+              " != " + std::to_string(m_avPacket->dts));
   }
 
   auto tmp = time::Timestamp(m_avPacket->pts, m_tb);
@@ -162,19 +158,17 @@ void AVPacketImpl::setTimestamp(time::Seconds const &seconds) {
 
 void AVPacketImpl::setData(uint8_t *dataPtr, int size) {
   if (size < 0) {
-    throw std::runtime_error("Data size cannot be negative");
+    LOG_FATAL("Data size cannot be negative");
   }
 
   if (size == 0 && dataPtr) {
-    throw std::runtime_error(
-        "Data size cannot be zero if the data is different from nullptr");
+    LOG_FATAL("Data size cannot be zero if the data is different from nullptr");
   }
 
   av_packet_unref(m_avPacket);
   int const err = av_packet_from_data(m_avPacket, dataPtr, size);
   if (err < 0) {
-    throw std::runtime_error("Error setting the data to the AVPacket: " +
-                             utils::Logger::avErrorToStr(err));
+    LOG_FATAL_FFMPEG_ERR("Error setting the data to the AVPacket.", err);
   }
 }
 
@@ -184,7 +178,7 @@ void AVPacketImpl::setContentType(avformat::StreamType const &type) {
 
 void AVPacketImpl::setDuration(int duration) {
   if (duration <= 0) {
-    throw std::runtime_error("AVPacket duration must be a positive number");
+    LOG_FATAL("AVPacket duration must be a positive number");
   }
 
   m_avPacket->duration = duration;
@@ -192,7 +186,7 @@ void AVPacketImpl::setDuration(int duration) {
 
 void AVPacketImpl::setStreamIndex(int index) {
   if (index <= 0) {
-    throw std::runtime_error("AVPacket stream index must be a positive number");
+    LOG_FATAL("AVPacket stream index must be a positive number");
   }
 
   m_avPacket->stream_index = index;
@@ -212,23 +206,27 @@ void AVPacketImpl::refToPacket(const IAVPacket *const other) {
   auto const packetImpl = dynamic_cast<const AVPacketImpl *const>(other);
 
   if (!packetImpl) {
-    throw std::runtime_error(
-        "Could not handle packet while trying to reference it");
+    LOG_FATAL("Could not handle packet while trying to reference it");
   }
 
   this->AVPacketImpl::clear();
 
-  av_packet_ref(m_avPacket, packetImpl->m_avPacket);
-  m_tb = other->getTimebase();
-  m_type = other->getContentType();
+  int const err = av_packet_ref(m_avPacket, packetImpl->m_avPacket);
+  if (err == 0) {
+    m_tb = other->getTimebase();
+    m_type = other->getContentType();
+  } else {
+    LOG_WARN("Could not reference packet. This one will be left blank")
+    m_tb = time::Timebase();
+    m_type = avformat::StreamType::NONE;
+  }
 }
 
 void AVPacketImpl::moveToPacket(IAVPacket *const dst) {
   auto const packetImpl = dynamic_cast<const AVPacketImpl *const>(dst);
 
   if (!packetImpl) {
-    throw std::runtime_error(
-        "Could not handle packet while trying to move to it");
+    LOG_FATAL("Could not handle packet while trying to move to it");
   }
 
   av_packet_move_ref(packetImpl->m_avPacket, m_avPacket);
