@@ -179,5 +179,6 @@ int AVFrameImpl::getDecodingErrorFlags() const {
   return m_avframe->decode_error_flags;
 }
 
+AVFrame *AVFrameImpl::getWrappedFrame() { return m_avframe; }
 }; // namespace avutil
 }; // namespace libffmpegxx

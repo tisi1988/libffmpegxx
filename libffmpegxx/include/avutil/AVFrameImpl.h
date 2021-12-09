@@ -43,6 +43,8 @@ public:
   utils::AVOptions getMetadata() const override;
   int getDecodingErrorFlags() const override;
 
+  AVFrame *getWrappedFrame();
+
 private:
   time::Timebase m_tb;
   AVFrame *m_avframe{nullptr};

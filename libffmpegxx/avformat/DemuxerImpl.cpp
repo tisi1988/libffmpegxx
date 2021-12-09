@@ -72,8 +72,8 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
   error = avformat_find_stream_info(m_formatContext, opts ? (&opts) : nullptr);
   if (error < 0) {
     close();
-    LOG_FATAL_FFMPEG_ERR(
-        "Could not open find stream info for media: " + m_uri, error)
+    LOG_FATAL_FFMPEG_ERR("Could not open find stream info for media: " + m_uri,
+                         error)
   }
 
   LOG_INFO("Stream info found for " + m_uri)
@@ -87,7 +87,7 @@ MediaInfo DemuxerImpl::open(const utils::AVOptions &options) {
 void DemuxerImpl::close() {
   std::lock_guard<std::mutex> l(m_ioMutex);
 
-  if (m_formatContext) {
+  if (!m_formatContext) {
     LOG_WARN("Trying to close demuxer for " + m_uri +
              " but it is already closed");
     return;

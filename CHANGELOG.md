@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.0.5-alpha] - XXXX-XX-XX
  
 ### Added
+- Decoder
+- Decoding sample app
 
 ### Changed
 
 ### Fixed
+- Wrong warning message when closing demuxer
 
 ## [0.0.4-alpha] - 2021-12-05
  

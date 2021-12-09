@@ -67,7 +67,7 @@ void initializeDataCodecProperties(DataInfo const &info,
   // TODO
 }
 
-void initializeCodecParameters(AVCodecParameters *codecPar, int streamCount,
+void initializeCodecParameters(AVCodecParameters *codecPar,
                                StreamInfo const &info) {
   if (std::holds_alternative<VideoInfo>(info.properties)) {
     initializeVideoCodecProperties(std::get<VideoInfo>(info.properties),
@@ -106,7 +106,7 @@ void addStreams(AVFormatContext *ctx,
     }
 
     stream->id = ctx->nb_streams - 1;
-    initializeCodecParameters(stream->codecpar, ctx->nb_streams, info);
+    initializeCodecParameters(stream->codecpar, info);
     initializeStreamParameters(stream, info);
 
 // Some de/muxers still use the AV'Codec'codec' attribute.
