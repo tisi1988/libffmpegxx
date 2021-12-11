@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../avcodec/AVCodecPar.h"
 #include "../time/Timebase.h"
 #include "../time/time_defs.h"
 #include "../utils/AVOptions.h"
@@ -28,116 +29,18 @@ struct VideoInfo {
   /**
    * @brief Average framerate in frames per second.
    */
-  double averageFramerate;
-
-  /**
-   * @brief Image format.
-   */
-  AVPixelFormat format;
+  utils::Rational averageFramerate;
 
   /**
    * @brief Amount of video frames.
    */
   int64_t frameCount;
-
-  /**
-   * @brief Video width.
-   */
-  int width;
-
-  /**
-   * @brief Video height.
-   */
-  int height;
-
-  /**
-   * @brief Additional colorspace characteristics.
-   */
-  AVChromaLocation chromaLocation;
-  AVColorPrimaries colorPrimaries;
-  AVColorRange colorRange;
-  AVColorSpace colorSpace;
-  AVColorTransferCharacteristic colorTrc;
-
-  /**
-   * @brief The order of the fields in interlaced video.
-   */
-  AVFieldOrder fieldOrder;
-
-  /**
-   * @brief Number of delayed frames.
-   */
-  int videoDelay;
-
-  /**
-   * @brief The aspect ratio (width / height) which a single pixel
-   * should have when displayed.
-   */
-  utils::Rational sampleAspectRatio;
 };
 
 /**
  * @brief The DataInfo struct holds the data of a audio stream.
  */
-struct AudioInfo {
-  /**
-   * @brief Audio sample format.
-   */
-  AVSampleFormat format;
-
-  /**
-   * @brief Audio channel count.
-   */
-  int channelCount;
-
-  /**
-   * @brief Audio channel layout.
-   */
-  int channelLayout;
-
-  /**
-   * @brief Duration of an audio frame (in samples).
-   */
-  int frameSize;
-
-  /**
-   * @brief Audio sample rate in Hz.
-   */
-  int sampleRate;
-
-  /**
-   * @brief The number of bits per sample in the codedwords.
-   */
-  int bitsPerCodedSample;
-
-  /**
-   * @brief This is the number of valid bits in each output sample.
-   */
-  int bitsPerRawSample;
-
-  /**
-   * @brief The number of bytes per coded audio frame, required by some
-   * formats.
-   */
-  int blockAlign;
-
-  /**
-   * @brief The amount of padding (in samples) inserted by the encoder at
-   * the beginning of the audio.
-   */
-  int initialPadding;
-
-  /**
-   * @brief Number of samples to skip after a discontinuity.
-   */
-  int seekPreroll;
-
-  /**
-   * @brief The amount of padding (in samples) appended by the encoder to
-   * the end of the audio.
-   */
-  int trailingPadding;
-};
+struct AudioInfo {};
 
 /**
  * @brief The DataInfo struct holds the data of a subtitle stream.
@@ -159,11 +62,6 @@ struct StreamInfo {
    * @brief Stream type.
    */
   StreamType type;
-
-  /**
-   * @brief Data bitrate in bits per second.
-   */
-  int64_t bitrate;
 
   /**
    * @brief Codec id.
@@ -191,38 +89,6 @@ struct StreamInfo {
   time::Seconds startTime;
 
   /**
-   * @brief Codec profile.
-   */
-  int profile;
-
-  /**
-   * @brief Codec level.
-   */
-  int level;
-
-  /**
-   * @brief Additional information about the codec (corresponds to the AVI
-   * FOURCC).
-   */
-  uint32_t codecTag;
-
-  /**
-   * @brief General type of the encoded data.
-   */
-  AVMediaType codecType;
-
-  /**
-   * @brief Extra binary data needed for initializing the decoder,
-   * codec-dependent.
-   */
-  std::vector<uint8_t> extraData;
-
-  /**
-   * @brief Size of the extradata content in bytes.
-   */
-  int extraDataSize;
-
-  /**
    * @brief Contains the stream metadata.
    */
   utils::AVOptions metadata;
@@ -231,6 +97,11 @@ struct StreamInfo {
    * @brief Contains the properties of the stream.
    */
   std::variant<VideoInfo, AudioInfo, SubtitleInfo, DataInfo> properties;
+
+  /**
+   * @brief Contains the properties of the codec.
+   */
+  avcodec::AVCodecPar codecPar;
 };
 
 /**

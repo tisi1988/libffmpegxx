@@ -27,7 +27,7 @@ public:
   virtual time::Timestamp getPts() const = 0;
 
   /**
-   * @return the packet's timebase. Usually, this is the Timebase
+   * @return the frames' timebase. Usually, this is the Timebase
    * this packet belongs to.
    */
   virtual time::Timebase getTimebase() const = 0;

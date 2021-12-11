@@ -3,8 +3,6 @@
 #include "public/utils/Logger.h"
 #include "utils/exception.h"
 
-#include <sstream>
-
 extern "C" {
 #include <libavutil/dict.h>
 }

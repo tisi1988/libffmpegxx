@@ -35,7 +35,7 @@ int main() {
 
     // Decode packet
     decodeError = decoders.at(packet->getStreamIndex())->decode(packet, frame);
-    if (decodeError == EAGAIN) {
+    if (decodeError == AVERROR(EAGAIN)) {
       std::cout << "Decoder for stream " << packet->getStreamIndex()
                 << " not ready yet" << std::endl;
     } else if (decodeError != 0) {
@@ -51,14 +51,11 @@ int main() {
   } while (demuxError >= 0);
 
   // You should flush the decoders if you want all the decoded content!
-  packet->clear();
   for (auto &&[idx, decoder] : decoders) {
-    int cnt{0};
-    while (decoder->decode(packet, frame) == 0) {
-      ++cnt;
-    }
-    std::cout << "Flushed " << cnt << " frames from decoder for stream " << idx
-              << std::endl;
+    std::vector<libffmpegxx::avutil::IAVFrame *> frames;
+    decoder->flush(frames);
+    std::cout << "Flushed " << frames.size()
+              << " frames from decoder for stream " << idx << std::endl;
   }
 
   // Clean-up section

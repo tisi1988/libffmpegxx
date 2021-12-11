@@ -1,1 +1,2 @@
-createTestApp(decoding "-lavcodec -lavformat -lavutil")
+add_subdirectory(decoding)
+add_subdirectory(transcoding)

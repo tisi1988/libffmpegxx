@@ -6,8 +6,6 @@
 #include "avcodec/AVPacketImpl.h"
 #include "utils/exception.h"
 
-#include <sstream>
-
 namespace libffmpegxx {
 namespace utils {
 extern AVDictionary *toAVDictionary(AVOptions const &options);
@@ -72,8 +70,8 @@ void MuxerImpl::open(utils::AVOptions const &options) {
   error = avio_open2(&m_formatContext->pb, m_mediaInfo.uri.c_str(),
                      AVIO_FLAG_WRITE, nullptr, &opts);
   if (error < 0) {
-    LOG_FATAL_FFMPEG_ERR(
-        "Error while opening output for " + m_mediaInfo.uri, error);
+    LOG_FATAL_FFMPEG_ERR("Error while opening output for " + m_mediaInfo.uri,
+                         error);
   }
 
   LOG_DEBUG("Muxer opened successfully for " + m_mediaInfo.uri);
@@ -82,8 +80,8 @@ void MuxerImpl::open(utils::AVOptions const &options) {
 
   error = avformat_write_header(m_formatContext, NULL);
   if (error < 0) {
-    LOG_FATAL_FFMPEG_ERR(
-        "Error while writing header for " + m_mediaInfo.uri, error);
+    LOG_FATAL_FFMPEG_ERR("Error while writing header for " + m_mediaInfo.uri,
+                         error);
   }
 
   LOG_DEBUG("Header written output for " + m_mediaInfo.uri);
@@ -107,8 +105,8 @@ void MuxerImpl::close() {
 
     const int error = av_write_trailer(m_formatContext);
     if (error < 0) {
-      LOG_FATAL_FFMPEG_ERR(
-          "Error while writing trailer for " + m_mediaInfo.uri, error);
+      LOG_FATAL_FFMPEG_ERR("Error while writing trailer for " + m_mediaInfo.uri,
+                           error);
     }
 
     LOG_DEBUG("Closing I/O to " + m_mediaInfo.uri);
@@ -151,9 +149,9 @@ void MuxerImpl::write(avcodec::IAVPacket *packet) {
   int const error =
       av_write_frame(m_formatContext, packetImpl->getWrappedPacket());
   if (error < 0) {
-    LOG_FATAL_FFMPEG_ERR("Error while writing packet for " +
-                                     m_mediaInfo.uri + ". " + debugInfo,
-                                 error);
+    LOG_FATAL_FFMPEG_ERR("Error while writing packet for " + m_mediaInfo.uri +
+                             ". " + debugInfo,
+                         error);
   }
 }
 }; // namespace avformat

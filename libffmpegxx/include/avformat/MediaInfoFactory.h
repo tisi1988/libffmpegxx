@@ -15,7 +15,7 @@ public:
   /**
    * @brief Build a MediaInfo containing the information from a media.
    * @param ctx The AVFormatContext pointer to the media.
-   * @return the MEdiaInfo data structure instance.
+   * @return the MediaInfo data structure instance.
    */
   static MediaInfo build(AVFormatContext *ctx);
 };

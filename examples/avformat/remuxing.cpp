@@ -7,30 +7,6 @@
 #include <iostream>
 #include <sstream>
 
-std::string toString(libffmpegxx::avformat::VideoInfo const &info) {
-  std::stringstream ss;
-
-  ss << "\t\tAverage framerate: " << info.averageFramerate << std::endl;
-  ss << "\t\tPixel format: " << info.format << std::endl;
-  ss << "\t\tFrame count: " << info.frameCount << std::endl;
-  ss << "\t\tWidth: " << info.width << std::endl;
-  ss << "\t\tHeight: " << info.height << std::endl;
-
-  return ss.str();
-};
-
-std::string toString(libffmpegxx::avformat::AudioInfo const &info) {
-  std::stringstream ss;
-
-  ss << "\t\tSample format: " << info.format << std::endl;
-  ss << "\t\tChannel count: " << info.channelCount << std::endl;
-  ss << "\t\tChannel layout: " << info.channelLayout << std::endl;
-  ss << "\t\tFrame size: " << info.frameSize << std::endl;
-  ss << "\t\tSamplerate: " << info.sampleRate << std::endl;
-
-  return ss.str();
-};
-
 std::string toString(libffmpegxx::avformat::StreamInfo const &info) {
   std::stringstream ss;
 
@@ -38,26 +14,12 @@ std::string toString(libffmpegxx::avformat::StreamInfo const &info) {
   ss << "\tStream type: " << static_cast<int>(info.type) << std::endl;
   ss << "\tCodec ID: " << info.codecId << std::endl;
   ss << "\tCodec name: " << info.codecName << std::endl;
-  ss << "\tBitrate: " << info.bitrate << std::endl;
+  ss << "\tBitrate: " << info.codecPar->bit_rate << std::endl;
   ss << "\tDuration: " << info.duration.count() << " seconds" << std::endl;
   ss << "\tTimebase: " << info.timebase.toString() << std::endl;
   ss << "\tStart time: " << info.startTime.count() << " seconds" << std::endl;
-  ss << "\tProfile: " << info.profile << std::endl;
-  ss << "\tLevel: " << info.level << std::endl;
-
-  switch (info.type) {
-  case libffmpegxx::avformat::StreamType::VIDEO:
-    ss << toString(std::get<libffmpegxx::avformat::VideoInfo>(info.properties));
-    break;
-  case libffmpegxx::avformat::StreamType::AUDIO:
-    ss << toString(std::get<libffmpegxx::avformat::AudioInfo>(info.properties));
-    break;
-  case libffmpegxx::avformat::StreamType::SUBTITLE:
-  case libffmpegxx::avformat::StreamType::DATA:
-  case libffmpegxx::avformat::StreamType::NONE:
-  default:
-    break;
-  }
+  ss << "\tProfile: " << info.codecPar->profile << std::endl;
+  ss << "\tLevel: " << info.codecPar->level << std::endl;
 
   return ss.str();
 }

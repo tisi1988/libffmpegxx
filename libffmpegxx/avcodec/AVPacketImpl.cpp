@@ -4,9 +4,6 @@
 #include "utils/LoggerApi.h"
 #include "utils/exception.h"
 
-#include <sstream>
-#include <stdexcept>
-
 extern "C" {
 #if LIBAVCODEC_VERSION_MAJOR >= 58 && LIBAVCODEC_VERSION_MINOR >= 78 &&        \
     LIBAVCODEC_VERSION_MICRO >= 100

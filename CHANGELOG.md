@@ -4,13 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.0.6-alpha] - XXXX-XX-XX
+## [0.0.6-alpha] - 2021-12-11
  
 ### Added
+- Encoder
+- Transcoding sample app
+- Frame flush in Decoder
+- AVCodecPar struct. RAII for AVCodecParameters struct.
 
 ### Changed
+- Media info stores the whole AVCodecParameters instead of scattered data.
 
 ### Fixed
+- Decoded frames now contain the timebase
 
 ## [0.0.5-alpha] - 2021-12-10
  

@@ -6,27 +6,9 @@
 #include "avcodec/AVPacketImpl.h"
 #include "avutil/AVFrameImpl.h"
 #include "utils/LoggerApi.h"
+#include "utils/exception.h"
 
 namespace libffmpegxx {
-namespace avformat {
-extern void initializeCommonCodecProperties(StreamInfo const &info,
-                                            AVCodecParameters *codecPar);
-}
-
-namespace {
-void initCodecContextCodeParameters(avformat::StreamInfo const &info,
-                                    AVCodecContext *codecCtx) {
-  auto codecPar = avcodec_parameters_alloc();
-  initializeCommonCodecProperties(info, codecPar);
-  int const error = avcodec_parameters_to_context(codecCtx, codecPar);
-  avcodec_parameters_free(&codecPar);
-  if (error < 0) {
-    LOG_FATAL("Error while initializing decoder: " +
-              utils::Logger::avErrorToStr(error));
-  }
-}
-} // namespace
-
 namespace avcodec {
 IDecoder *DecoderFactory::create(avformat::StreamInfo const &streamInfo) {
   return new DecoderImpl(streamInfo);
@@ -45,13 +27,16 @@ DecoderImpl::DecoderImpl(avformat::StreamInfo const &streamInfo) {
               std::to_string(streamInfo.codecId));
   }
 
-  initCodecContextCodeParameters(streamInfo, m_codecCtx);
+  avcodec_parameters_to_context(m_codecCtx, *streamInfo.codecPar);
 
   int const error = avcodec_open2(m_codecCtx, codec, nullptr);
   if (error < 0) {
-    LOG_FATAL("Could not open decoder for codec ID " +
-              std::to_string(streamInfo.codecId));
+    LOG_FATAL_FFMPEG_ERR("Could not open decoder for codec ID " +
+                             std::to_string(streamInfo.codecId),
+                         error);
   }
+
+  m_tb = streamInfo.timebase;
 }
 
 DecoderImpl::~DecoderImpl() {
@@ -65,6 +50,7 @@ int DecoderImpl::decode(IAVPacket *packet, avutil::IAVFrame *frame) {
   if (!frameImpl) {
     LOG_FATAL("Error handling frame while decoding");
   }
+  frameImpl->clear();
 
   auto packetImpl = dynamic_cast<avcodec::AVPacketImpl *>(packet);
   if (!packetImpl) {
@@ -88,7 +74,38 @@ int DecoderImpl::decode(IAVPacket *packet, avutil::IAVFrame *frame) {
     } else {
       LOG_ERROR(msg);
     }
+  } else {
+    frameImpl->setTimebase(m_tb);
   }
+
+  return error;
+}
+
+int DecoderImpl::flush(std::vector<avutil::IAVFrame *> &flushedFrames) {
+  auto error = avcodec_send_packet(m_codecCtx, nullptr);
+  if (error < 0) {
+    LOG_ERROR("Error sending packet to decoder while flushing: " +
+              utils::Logger::avErrorToStr(error));
+
+    return error;
+  }
+
+  do {
+    AVFrame *f = av_frame_alloc();
+    error = avcodec_receive_frame(m_codecCtx, f);
+    if (error < 0) {
+      auto const msg = "Error receiving frame from decoder while flushing: " +
+                       utils::Logger::avErrorToStr(error);
+      if (error == AVERROR_EOF) {
+        LOG_INFO(msg);
+      } else {
+        LOG_ERROR(msg);
+      }
+      av_frame_free(&f);
+    } else {
+      flushedFrames.push_back(new avutil::AVFrameImpl(f, m_tb));
+    }
+  } while (error == 0);
 
   return error;
 }

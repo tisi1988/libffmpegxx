@@ -7,8 +7,6 @@
 #include "utils/LoggerApi.h"
 #include "utils/exception.h"
 
-#include <sstream>
-
 libffmpegxx::avformat::StreamInfo buildStreamInfo(AVStream *stream) {
   return libffmpegxx::avformat::StreamInfo{};
 }

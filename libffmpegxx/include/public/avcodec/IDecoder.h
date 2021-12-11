@@ -21,12 +21,17 @@ public:
    * @param packet The packet to decode.
    * @param frame The frame to store the output data.
    * @return FFmpeg API error code.
-   * @note Some decoders may fail to return decoded content
-   * on the first bunch of packets.
-   * @note To flush the decoder simply feed empty IAVPackets till
-   * the returned error code is not 0.
+   * @note Some decoders may need several packets before start producing
+   * decoded data.
    */
   virtual int decode(IAVPacket *packet, avutil::IAVFrame *frame) = 0;
+
+  /**
+   * @brief Flushes the decoder getting out any remaining frames.
+   * @param flushedFrames List of frames flushed from the decoder.
+   * @return FFmpeg API error code.
+   */
+  virtual int flush(std::vector<avutil::IAVFrame *> &flushedFrames) = 0;
 };
 
 /**
