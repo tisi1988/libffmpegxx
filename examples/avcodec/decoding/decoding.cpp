@@ -20,7 +20,7 @@ int main() {
 
   // Create decoders
   std::map<int, libffmpegxx::avcodec::IDecoder *> decoders;
-  for (auto &&[idx, info] : info.streamsInfo) {
+  for (auto const &[idx, info] : info.streamsInfo) {
     decoders.insert({idx, libffmpegxx::avcodec::DecoderFactory::create(info)});
   }
 

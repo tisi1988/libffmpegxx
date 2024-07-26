@@ -2,6 +2,8 @@
 
 #include "public/utils/Version.h"
 
+#include "libavutil/error.h"
+
 #include <mutex>
 #include <sstream>
 #include <string>

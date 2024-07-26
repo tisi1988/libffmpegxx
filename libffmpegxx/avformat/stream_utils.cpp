@@ -32,10 +32,13 @@ void addStreams(AVFormatContext *ctx,
     stream->id = ctx->nb_streams - 1;
     initializeStreamParameters(stream, info);
 
+    auto const codec= avcodec_find_encoder(info.codecId);
+    auto const context = avcodec_alloc_context3(codec);
+
 // Some de/muxers still use the AV'Codec'codec' attribute.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    avcodec_parameters_to_context(stream->codec, stream->codecpar);
+    avcodec_parameters_to_context(context, stream->codecpar);
 #pragma GCC diagnostic pop
   }
 }
